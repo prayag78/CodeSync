@@ -1,136 +1,89 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
-import { io, Socket } from "socket.io-client";
+import React, { useState } from "react";
 import { GridBackground } from "@/components/background";
 import { Navbar } from "@/components/navbar";
-import { Users, Zap, Globe, Play, Lock, Code, ArrowRight } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import Link from "next/link";
-import { CreateRoomForm } from "@/components/create-room-form";
+import { CreateRoom } from "@/components/create-room-form";
+import { JoinRoom } from "@/components/join-room-form";
+import { Users, Zap, Globe } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const Page = () => {
-  const [messages, setMessages] = useState<string[]>([]);
-  const [socket, setSocket] = useState<Socket | null>(null);
-  const [message, setMessage] = useState<string>("");
-  const [roomId, setRoomId] = useState<string>("");
-  const [joinedRoom, setJoinedRoom] = useState<string>("");
-  const [language, setLanguage] = useState<string>("javascript");
-  const [userId] = useState<string>("user" + Math.floor(Math.random() * 1000));
-
-  // useEffect(() => {
-  //   const newSocket = io("http://localhost:8000");
-  //   setSocket(newSocket);
-
-  //   newSocket.on("connect", () => {
-  //     console.log("Connected:", newSocket.id);
-  //   });
-
-  //   newSocket.on("receive-message", (msg: string) => {
-  //     setMessages((prev) => [...prev, msg]);
-  //   });
-
-  //   newSocket.on("language-changed", (lang: string) => {
-  //     setLanguage(lang);
-  //   });
-
-  //   return () => {
-  //     newSocket.disconnect();
-  //   };
-  // }, []);
-
-  // const joinRoom = () => {
-  //   if (socket && roomId) {
-  //     socket.emit("join-room", { roomId, userId });
-  //     setJoinedRoom(roomId);
-  //     setRoomId("");
-  //   }
-  // };
-
-  const handleLanguageChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const newLang = e.target.value;
-    setLanguage(newLang);
-    if (socket && joinedRoom) {
-      socket.emit("change-language", { roomId: joinedRoom, language: newLang });
-    }
-  };
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (socket && joinedRoom) {
-      socket.emit("send-message", { roomId: joinedRoom, message });
-      setMessages((prev) => [...prev, `You: ${message}`]);
-      setMessage("");
-    }
-  };
+  const [activeTab, setActiveTab] = useState<"create" | "join">("create");
 
   return (
-    // <form
-    //   onSubmit={handleSubmit}
-    //   className="flex flex-col items-center justify-center h-screen gap-4 text-gray-700"
-    // >
-    //   <h1 className="text-xl font-bold">Room Chat</h1>
-
-    //   {!joinedRoom && (
-    //     <div className="flex items-center gap-2">
-    //       <input
-    //         type="text"
-    //         placeholder="Room ID"
-    //         value={roomId}
-    //         onChange={(e) => setRoomId(e.target.value)}
-    //         className="p-2 border"
-    //       />
-    //       <button
-    //         type="button"
-    //         onClick={joinRoom}
-    //         className="ml-2 bg-blue-500 p-2"
-    //       >
-    //         Join
-    //       </button>
-    //     </div>
-    //   )}
-
-    //   {joinedRoom && (
-    //     <>
-    //       <div>Room: <b>{joinedRoom}</b> | User: <b>{userId}</b></div>
-
-    //       <div>
-    //         <label className="mr-2">Language:</label>
-    //         <select value={language} onChange={handleLanguageChange} className="p-2 border">
-    //           <option value="c">C</option>
-    //           <option value="cpp">C++</option>
-    //           <option value="javascript">JavaScript</option>
-    //           <option value="typescript">TypeScript</option>
-    //         </select>
-    //       </div>
-
-    //       <div>
-    //         <input
-    //           type="text"
-    //           placeholder="Message"
-    //           value={message}
-    //           onChange={(e) => setMessage(e.target.value)}
-    //           className="p-2 border"
-    //         />
-    //         <button type="submit" className="ml-2 bg-green-500 p-2 text-sm text-gray-700">
-    //           Send
-    //         </button>
-    //       </div>
-
-    //       <div className="border p-4 w-1/2 h-1/2 overflow-y-auto text-sm text-gray-700">
-    //         {messages.map((msg, i) => (
-    //           <div key={i}>{msg}</div>
-    //         ))}
-    //       </div>
-    //     </>
-    //   )}
-    // </form>
     <div className="flex flex-col">
       <Navbar />
 
       {/* Hero */}
       <GridBackground />
+
+      {/* Room Creation/Joining Section */}
+      <div className="z-10 py-20 flex flex-col items-center justify-center">
+        <div className="container px-4 md:px-6">
+          <div className="mb-12 text-center">
+            <h2 className="text-3xl text-gray-700 font-bold tracking-tighter sm:text-4xl md:text-5xl">
+              Start Coding Together
+            </h2>
+            <p className="mt-4 text-xl text-muted-foreground">
+              Create a new room or join an existing one to start collaborating
+            </p>
+          </div>
+
+          <div className="max-w-md mx-auto">
+            {/* Tab Navigation */}
+            <div className="flex mb-6 bg-gray-100 rounded-lg p-1">
+              <button
+                onClick={() => setActiveTab("create")}
+                className={cn(
+                  "flex-1 py-2 px-4 rounded-md text-sm font-medium transition-colors",
+                  activeTab === "create"
+                    ? "bg-white text-gray-900 shadow-sm"
+                    : "text-gray-600 hover:text-gray-900"
+                )}
+              >
+                Create Room
+              </button>
+              <button
+                onClick={() => setActiveTab("join")}
+                className={cn(
+                  "flex-1 py-2 px-4 rounded-md text-sm font-medium transition-colors",
+                  activeTab === "join"
+                    ? "bg-white text-gray-900 shadow-sm"
+                    : "text-gray-600 hover:text-gray-900"
+                )}
+              >
+                Join Room
+              </button>
+            </div>
+
+            {/* Tab Content */}
+            <div className="bg-white rounded-lg shadow-lg p-6">
+              {activeTab === "create" ? (
+                <div className="text-center">
+                  <h3 className="text-lg font-semibold mb-4">
+                    Create a New Room
+                  </h3>
+                  <p className="text-gray-600 mb-6">
+                    Create a new coding session and invite others to join
+                  </p>
+                  <CreateRoom />
+                </div>
+              ) : (
+                <div className="text-center">
+                  <h3 className="text-lg font-semibold mb-4">
+                    Join Existing Room
+                  </h3>
+                  <p className="text-gray-600 mb-6">
+                    Enter a room ID to join an existing coding session
+                  </p>
+                  <JoinRoom />
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      </div>
 
       {/* Features */}
       <div

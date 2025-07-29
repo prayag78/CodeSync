@@ -2,19 +2,14 @@
 
 import type React from "react";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect} from "react";
 import {
   Play,
   Users,
-  Video,
-  VideoOff,
-  Mic,
-  MicOff,
-  Sun,
-  Moon,
   Share2,
   GripHorizontal,
   GripVertical,
+  Copy,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -28,99 +23,8 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import CodeEditor from "@/components/editor";
 import { useStore } from "@/hooks/store";
-
-// Language starter templates
-const starterCode = {
-  cpp: `#include <iostream>
-using namespace std;
-
-int main() {
-    cout << "Hello, World!" << endl;
-    return 0;
-}`,
-  javascript: `// Welcome to the collaborative editor
-console.log("Hello, World!");
-
-function greet(name) {
-    return \`Hello, \${name}!\`;
-}
-
-console.log(greet("CodeChef"));`,
-  typescript: `// TypeScript collaborative coding
-interface User {
-    name: string;
-    id: number;
-}
-
-const user: User = {
-    name: "Developer",
-    id: 1
-};
-
-console.log(\`Hello, \${user.name}!\`);`,
-  python: `# Python collaborative coding
-def greet(name: str) -> str:
-    return f"Hello, {name}!"
-
-def main():
-    print("Hello, World!")
-    print(greet("CodeChef"))
-
-if __name__ == "__main__":
-    main()`,
-  java: `public class Main {
-    public static void main(String[] args) {
-        System.out.println("Hello, World!");
-        
-        String name = "CodeChef";
-        System.out.println("Hello, " + name + "!");
-    }
-}`,
-  c: `#include <stdio.h>
-
-int main() {
-    printf("Hello, World!\\n");
-    
-    char name[] = "CodeChef";
-    printf("Hello, %s!\\n", name);
-    
-    return 0;
-}`,
-  rust: `fn main() {
-    println!("Hello, World!");
-    
-    let name = "CodeChef";
-    println!("Hello, {}!", name);
-}`,
-  go: `package main
-
-import "fmt"
-
-func main() {
-    fmt.Println("Hello, World!")
-    
-    name := "CodeChef"
-    fmt.Printf("Hello, %s!\\n", name)
-}`,
-};
-
-// Simulated users for collaboration
-const users = [
-  {
-    id: 1,
-    name: "Alex Chen",
-    avatar: "/placeholder.svg?height=32&width=32",
-    color: "bg-blue-500",
-    cursorColor: "border-blue-500",
-  },
-  {
-    id: 2,
-    name: "Sarah Kim",
-    avatar: "/placeholder.svg?height=32&width=32",
-    color: "bg-purple-500",
-    cursorColor: "border-purple-500",
-  },
-];
+import { getSocket } from "@/lib/socket-client";
+import { starterCode, users } from "@/lib/constants";
 
 // Horizontal Resizable Divider Component (for editor/panels split)
 function HorizontalResizableDivider({
@@ -365,29 +269,30 @@ function VerticalResizableDivider({
 // }
 
 // Collaborative Cursor Component
-function CollaborativeCursor({
-  user,
-  position,
-}: {
-  user: (typeof users)[0];
-  position: { x: number; y: number };
-}) {
-  return (
-    <div
-      className="absolute pointer-events-none z-40 transition-all duration-100"
-      style={{ left: position.x, top: position.y }}
-    >
-      <div
-        className={`w-0.5 h-5 ${user.cursorColor} border-l-2 animate-pulse`}
-      />
-      <div
-        className={`${user.color} text-white text-xs px-2 py-1 rounded-md mt-1 whitespace-nowrap shadow-lg`}
-      >
-        {user.name}
-      </div>
-    </div>
-  );
-}
+
+// function CollaborativeCursor({
+//   user,
+//   position,
+// }: {
+//   user: (typeof users)[0];
+//   position: { x: number; y: number };
+// }) {
+//   return (
+//     <div
+//       className="absolute pointer-events-none z-40 transition-all duration-100"
+//       style={{ left: position.x, top: position.y }}
+//     >
+//       <div
+//         className={`w-0.5 h-5 ${user.cursorColor} border-l-2 animate-pulse`}
+//       />
+//       <div
+//         className={`${user.color} text-white text-xs px-2 py-1 rounded-md mt-1 whitespace-nowrap shadow-lg`}
+//       >
+//         {user.name}
+//       </div>
+//     </div>
+//   );
+// }
 
 export default function CollaborativeCodeEditor() {
   const [selectedLanguage, setSelectedLanguage] = useState("javascript");
@@ -397,18 +302,36 @@ export default function CollaborativeCodeEditor() {
   const [editorWidth, setEditorWidth] = useState(70); // Percentage of the main container width
   const [inputValue, setInputValue] = useState("");
   const [output, setOutput] = useState("");
-  const [loading, setLoading] = useState(false);
   const { roomId } = useStore();
 
+  const copyRoomId = async () => {
+    try {
+      await navigator.clipboard.writeText(roomId);
+      // You could add a toast notification here
+      console.log("Room ID copied to clipboard");
+    } catch (err) {
+      console.error("Failed to copy room ID:", err);
+    }
+  };
+
   const handleLanguageChange = (language: string) => {
-    setSelectedLanguage(language);
-    setCode(starterCode[language as keyof typeof starterCode]);
+    const socket = getSocket();
+    socket.emit("change-language", { language, roomId });
+
+    // Safely update current user’s view
+    if (starterCode.hasOwnProperty(language)) {
+      setSelectedLanguage(language);
+      setCode(starterCode[language as keyof typeof starterCode]);
+    } else {
+      console.warn("Unsupported language:", language);
+    }
   };
 
   const runCode = async () => {
-    setLoading(true);
     setOutput("");
     setIsRunning(true);
+    const socket = getSocket();
+    socket.emit("execution-status", { roomId, isRunning: true });
 
     try {
       const res = await fetch("https://emkc.org/api/v2/piston/execute", {
@@ -432,18 +355,30 @@ export default function CollaborativeCodeEditor() {
 
       const result =
         data.run.output || data.run.stdout || data.run.stderr || "No output";
-      const time = data.run.time;
-      const memory = data.run.memory;
 
-      console.log("Execution time:", time);
-      console.log("Memory used:", memory);
+      const socket = getSocket();
+      socket.emit("run-code", {
+        roomId,
+        output: result,
+        language: selectedLanguage,
+        input: inputValue,
+        code: code,
+      });
 
       setOutput(result);
     } catch (err) {
       setOutput("Error executing code: " + err);
+      const socket = getSocket();
+      socket.emit("run-code", {
+        roomId,
+        output: "Error executing code: " + err,
+        language: selectedLanguage,
+        input: inputValue,
+        code: code,
+      });
     }
+    socket.emit("execution-status", { roomId, isRunning: false });
     setIsRunning(false);
-    setLoading(false);
   };
 
   const handleVerticalResize = (deltaY: number) => {
@@ -465,6 +400,108 @@ export default function CollaborativeCodeEditor() {
     );
     setEditorWidth(newEditorWidth);
   };
+
+  const handleCodeChange = (newCode: string) => {
+    setCode(newCode);
+
+    const socket = getSocket();
+    socket.emit("code-changed", { roomId, code: newCode });
+  };
+
+  const handleInputChange = (newInput: string) => {
+    setInputValue(newInput);
+    const socket = getSocket();
+    socket.emit("input-changed", { roomId, input: newInput });
+  };
+
+  useEffect(() => {
+    const socket = getSocket();
+
+    const handleLanguageUpdate = (language: string) => {
+      console.log("📡 Received language update:", language);
+      if (starterCode.hasOwnProperty(language)) {
+        setSelectedLanguage(language);
+        setCode(starterCode[language as keyof typeof starterCode]);
+      } else {
+        console.warn("Unsupported language received:", language);
+      }
+    };
+
+    socket.on("language-changed", handleLanguageUpdate);
+
+    return () => {
+      socket.off("language-changed", handleLanguageUpdate);
+    };
+  }, []);
+
+  useEffect(() => {
+    const socket = getSocket();
+
+    const handleCodeChanged = ({ code }: { code: string }) => {
+      setCode(code);
+    };
+
+    socket.on("code-changed", handleCodeChanged);
+
+    return () => {
+      socket.off("code-changed", handleCodeChanged);
+    };
+  }, []);
+
+  useEffect(() => {
+    const socket = getSocket();
+
+    const handleInputChanged = ({ input }: { input: string }) => {
+      setInputValue(input);
+    };
+
+    socket.on("input-changed", handleInputChanged);
+
+    return () => {
+      socket.off("input-changed", handleInputChanged);
+    };
+  }, []);
+
+  useEffect(() => {
+    const socket = getSocket();
+
+    const handleCodeRun = ({
+      output,
+      language,
+      code,
+      input,
+    }: {
+      output: string;
+      language: string;
+      code: string;
+      input: string;
+    }) => {
+      console.log("Received code run result");
+
+      setSelectedLanguage(language);
+      setCode(code);
+      setInputValue(input);
+      setOutput(output);
+      setIsRunning(false);
+    };
+
+    socket.on("code-run", handleCodeRun);
+
+    return () => {
+      socket.off("code-run", handleCodeRun);
+    };
+  }, []);
+
+  useEffect(() => {
+    const socket = getSocket();
+    const handleExecutionStatus = ({ isRunning }: { isRunning: boolean }) => {
+      setIsRunning(isRunning);
+    };
+    socket.on("execution-status", handleExecutionStatus);
+    return () => {
+      socket.off("execution-status", handleExecutionStatus);
+    };
+  }, []);
 
   return (
     <div className={`min-h-screen transition-colors duration-300 bg-slate-950`}>
@@ -495,6 +532,14 @@ export default function CollaborativeCodeEditor() {
               </div>
               <Badge variant="secondary" className="ml-2">
                 Room ID: {roomId}
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={copyRoomId}
+                  className="h-6 w-6 p-0 ml-2"
+                >
+                  <Copy className="w-4 h-4 text-gray-400" />
+                </Button>
               </Badge>
             </div>
           </div>
@@ -505,7 +550,9 @@ export default function CollaborativeCodeEditor() {
               value={selectedLanguage}
               onValueChange={handleLanguageChange}
             >
-              <SelectTrigger className={`w-40 bg-slate-800 border-slate-700`}>
+              <SelectTrigger
+                className={`w-40 bg-slate-800 border-slate-700 text-white`}
+              >
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
@@ -546,25 +593,10 @@ export default function CollaborativeCodeEditor() {
           className="flex flex-col min-w-0"
           style={{ width: `${editorWidth}%` }}
         >
-          <div
-            className={`border-b border-slate-800 bg-slate-900 px-4 py-2 flex items-center justify-between`}
-          >
-            <div className="flex items-center gap-2">
-              <span className={`text-sm font-medium text-gray-300`}>
-                {selectedLanguage}
-              </span>
-              <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
-
-              <span className={`text-xs text-gray-400`}>
-                {code.split("\n").length} lines
-              </span>
-            </div>
-          </div>
-
           <CodeEditor
             code={code}
             language={selectedLanguage}
-            setCode={setCode}
+            setCode={handleCodeChange}
           />
         </div>
 
@@ -600,9 +632,9 @@ export default function CollaborativeCodeEditor() {
             <div className="flex-1 p-4 min-h-0">
               <textarea
                 value={inputValue}
-                onChange={(e) => setInputValue(e.target.value)}
+                onChange={(e) => handleInputChange(e.target.value)}
                 placeholder="Enter input for your program here..."
-                className={`w-full h-full resize-none border rounded-md p-3 text-sm font-mono ${"bg-slate-800 border-slate-700 text-gray-100 placeholder-gray-500"} focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all`}
+                className={`w-full h-full resize-none   border rounded-md p-3 text-sm font-mono ${"bg-slate-800 border-slate-700 text-gray-100 placeholder-gray-500"} focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all`}
                 style={{
                   fontFamily: 'Monaco, Menlo, "Ubuntu Mono", monospace',
                   lineHeight: "1.4",

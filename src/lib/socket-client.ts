@@ -4,7 +4,15 @@ let socket: Socket | null = null;
 
 export const getSocket = (): Socket => {
   if (!socket) {
-    socket = io(process.env.NEXT_PUBLIC_SOCKET_URL);
+    socket = io(process.env.NEXT_PUBLIC_SOCKET_URL || "http://localhost:8000", {
+      // Add connection options to prevent premature disconnections
+      timeout: 20000,
+      forceNew: false,
+      reconnection: true,
+      reconnectionAttempts: 5,
+      reconnectionDelay: 1000,
+      reconnectionDelayMax: 5000,
+    });
   }
   return socket;
 };
@@ -25,13 +33,17 @@ export const joinRoom = (
 ) => {
   const socketInstance = getSocket();
 
+  // Remove existing listeners to prevent duplicates
+  socketInstance.off("room-joined");
+  socketInstance.off("room-not-available");
+
   // Listen for room join response
-  socketInstance.once("room-joined", () => {
+  socketInstance.on("room-joined", () => {
     console.log(`Successfully joined room ${roomId}`);
     onSuccess?.();
   });
 
-  socketInstance.once("room-not-available", (message: string) => {
+  socketInstance.on("room-not-available", (message: string) => {
     console.log(`Room ${roomId} is not available: ${message}`);
     onError?.(message);
   });
@@ -46,16 +58,53 @@ export const checkRoomExists = (
 ) => {
   const socketInstance = getSocket();
 
+  // Remove existing listeners to prevent duplicates
+  socketInstance.off("room-exists");
+  socketInstance.off("room-not-exists");
+
   // Listen for room existence response
-  socketInstance.once("room-exists", () => {
+  socketInstance.on("room-exists", () => {
     console.log(`Room ${roomId} exists`);
     onExists?.();
   });
 
-  socketInstance.once("room-not-exists", () => {
+  socketInstance.on("room-not-exists", () => {
     console.log(`Room ${roomId} does not exist`);
     onNotExists?.();
   });
 
-  socketInstance.emit("check-room", { roomId });
+  // Ensure socket is connected before checking room
+  if (socketInstance.connected) {
+    socketInstance.emit("check-room", { roomId });
+  } else {
+    socketInstance.on("connect", () => {
+      console.log("Socket connected, checking room existence...");
+      socketInstance.emit("check-room", { roomId });
+    });
+  }
+};
+
+// export const changeLanguage = (language: string, roomId: string) => {
+//   const socketInstance = getSocket();
+//   socketInstance.on("language-changed", (language: string) => {
+//     console.log(`Language changed to ${language}`);
+//   });
+//   socketInstance.emit("change-language", { language, roomId });
+// };
+
+// Additional utility function to check room status via HTTP endpoint
+export const checkRoomStatus = async (roomId: string) => {
+  try {
+    const response = await fetch(
+      `${
+        process.env.NEXT_PUBLIC_SOCKET_URL || "http://localhost:8000"
+      }/api/rooms/${roomId}`
+    );
+    const data = await response.json();
+    console.log("Room status:", data);
+    return data;
+  } catch (error) {
+    console.error("Error checking room status:", error);
+    return null;
+  }
 };

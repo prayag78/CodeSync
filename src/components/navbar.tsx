@@ -18,8 +18,7 @@ import { useStore } from "@/hooks/store";
 
 export function Navbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const { roomId, setRoomId } = useStore();
-  // const [roomId, setRoomId] = useState<string>("");
+  const { roomId, setRoomId } = useStore(); 
   const [userId] = useState<string>("user" + Math.floor(Math.random() * 1000));
   const [error, setError] = useState<string>("");
   const [isJoining, setIsJoining] = useState(false);
@@ -50,7 +49,7 @@ export function Navbar() {
       () => {
         clearTimeout(timeout);
         setIsJoining(false);
-        router.push(`/editor/${roomId}`);
+        router.push(`/editor`);
       },
       // Error callback
       (errorMessage: string) => {
