@@ -2,7 +2,7 @@
 
 import type React from "react";
 
-import { useState, useEffect} from "react";
+import { useState, useEffect } from "react";
 import {
   Play,
   Users,
@@ -10,6 +10,7 @@ import {
   GripHorizontal,
   GripVertical,
   Copy,
+  Phone,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -22,6 +23,7 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import CodeEditor from "@/components/editor";
+import VideoCall from "@/components/video-call";
 import { useStore } from "@/hooks/store";
 import { getSocket } from "@/lib/socket-client";
 import { starterCode, users } from "@/lib/constants";
@@ -126,174 +128,6 @@ function VerticalResizableDivider({
   );
 }
 
-// Draggable Video Call Component with Smooth Movement
-// function VideoCallWindow() {
-//   const [position, setPosition] = useState({ x: 20, y: 20 });
-//   const [isDragging, setIsDragging] = useState(false);
-//   const [isVideoOn, setIsVideoOn] = useState(true);
-//   const [isMicOn, setIsMicOn] = useState(true);
-//   const [isMinimized, setIsMinimized] = useState(false);
-//   const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
-//   const dragRef = useRef<HTMLDivElement>(null);
-
-//   const handleMouseDown = (e: React.MouseEvent) => {
-//     setIsDragging(true);
-//     const rect = dragRef.current?.getBoundingClientRect();
-//     if (rect) {
-//       const offsetX = e.clientX - rect.left;
-//       const offsetY = e.clientY - rect.top;
-//       setDragOffset({ x: offsetX, y: offsetY });
-
-//       const handleMouseMove = (e: MouseEvent) => {
-//         const newX = e.clientX - offsetX;
-//         const newY = e.clientY - offsetY;
-
-//         // Constrain to viewport
-//         const maxX = window.innerWidth - (isMinimized ? 200 : 280);
-//         const maxY = window.innerHeight - (isMinimized ? 60 : 200);
-
-//         setPosition({
-//           x: Math.max(0, Math.min(newX, maxX)),
-//           y: Math.max(0, Math.min(newY, maxY)),
-//         });
-//       };
-
-//       const handleMouseUp = () => {
-//         setIsDragging(false);
-//         document.removeEventListener("mousemove", handleMouseMove);
-//         document.removeEventListener("mouseup", handleMouseUp);
-//       };
-
-//       document.addEventListener("mousemove", handleMouseMove);
-//       document.addEventListener("mouseup", handleMouseUp);
-//     }
-//   };
-
-//   return (
-//     <div
-//       ref={dragRef}
-//       className={`fixed z-50 ${"bg-slate-800"} rounded-lg shadow-2xl border ${"border-slate-700"} overflow-hidden select-none ${
-//         isDragging
-//           ? "transition-none cursor-grabbing scale-105"
-//           : "transition-all duration-200 ease-out cursor-grab"
-//       }`}
-//       style={{
-//         left: position.x,
-//         top: position.y,
-//         width: isMinimized ? "200px" : "280px",
-//         height: isMinimized ? "60px" : "200px",
-//         transform: isDragging ? "rotate(2deg)" : "rotate(0deg)",
-//       }}
-//     >
-//       <div
-//         className={`p-2 ${"bg-slate-700"} border-b ${"border-slate-600"} flex items-center justify-between cursor-grab active:cursor-grabbing`}
-//         onMouseDown={handleMouseDown}
-//       >
-//         <div className="flex items-center gap-2">
-//           <Video className="w-4 h-4 text-green-500" />
-//           <span className={`text-sm font-medium text-white`}>Video Call</span>
-//         </div>
-//         <Button
-//           variant="ghost"
-//           size="sm"
-//           onClick={() => setIsMinimized(!isMinimized)}
-//           className="h-6 w-6 p-0"
-//         >
-//           <span className="text-xs">{isMinimized ? "□" : "−"}</span>
-//         </Button>
-//       </div>
-
-//       {!isMinimized && (
-//         <>
-//           <div className="relative h-32 bg-gradient-to-br from-slate-600 to-slate-800 flex items-center justify-center">
-//             <div className="grid grid-cols-2 gap-1 w-full h-full p-2">
-//               <div className="bg-slate-700 rounded flex items-center justify-center relative overflow-hidden">
-//                 <Avatar className="w-12 h-12">
-//                   <AvatarImage src={users[0].avatar || "/placeholder.svg"} />
-//                   <AvatarFallback>AC</AvatarFallback>
-//                 </Avatar>
-//                 <div className="absolute bottom-1 left-1 text-xs text-white bg-black bg-opacity-50 px-1 rounded">
-//                   You
-//                 </div>
-//               </div>
-//               <div className="bg-slate-700 rounded flex items-center justify-center relative overflow-hidden">
-//                 <Avatar className="w-12 h-12">
-//                   <AvatarImage src={users[1].avatar || "/placeholder.svg"} />
-//                   <AvatarFallback>SK</AvatarFallback>
-//                 </Avatar>
-//                 <div className="absolute bottom-1 left-1 text-xs text-white bg-black bg-opacity-50 px-1 rounded">
-//                   Sarah
-//                 </div>
-//               </div>
-//             </div>
-//           </div>
-
-//           <div className={`p-2 bg-slate-800 flex justify-center gap-2`}>
-//             <Button
-//               variant="ghost"
-//               size="sm"
-//               onClick={() => setIsMicOn(!isMicOn)}
-//               className={`h-8 w-8 p-0 transition-colors ${
-//                 isMicOn
-//                   ? "text-green-500 hover:bg-green-500/10"
-//                   : "text-red-500 hover:bg-red-500/10"
-//               }`}
-//             >
-//               {isMicOn ? (
-//                 <Mic className="w-4 h-4" />
-//               ) : (
-//                 <MicOff className="w-4 h-4" />
-//               )}
-//             </Button>
-//             <Button
-//               variant="ghost"
-//               size="sm"
-//               onClick={() => setIsVideoOn(!isVideoOn)}
-//               className={`h-8 w-8 p-0 transition-colors ${
-//                 isVideoOn
-//                   ? "text-green-500 hover:bg-green-500/10"
-//                   : "text-red-500 hover:bg-red-500/10"
-//               }`}
-//             >
-//               {isVideoOn ? (
-//                 <Video className="w-4 h-4" />
-//               ) : (
-//                 <VideoOff className="w-4 h-4" />
-//               )}
-//             </Button>
-//           </div>
-//         </>
-//       )}
-//     </div>
-//   );
-// }
-
-// Collaborative Cursor Component
-
-// function CollaborativeCursor({
-//   user,
-//   position,
-// }: {
-//   user: (typeof users)[0];
-//   position: { x: number; y: number };
-// }) {
-//   return (
-//     <div
-//       className="absolute pointer-events-none z-40 transition-all duration-100"
-//       style={{ left: position.x, top: position.y }}
-//     >
-//       <div
-//         className={`w-0.5 h-5 ${user.cursorColor} border-l-2 animate-pulse`}
-//       />
-//       <div
-//         className={`${user.color} text-white text-xs px-2 py-1 rounded-md mt-1 whitespace-nowrap shadow-lg`}
-//       >
-//         {user.name}
-//       </div>
-//     </div>
-//   );
-// }
-
 export default function CollaborativeCodeEditor() {
   const [selectedLanguage, setSelectedLanguage] = useState("javascript");
   const [code, setCode] = useState(starterCode.javascript);
@@ -302,6 +136,7 @@ export default function CollaborativeCodeEditor() {
   const [editorWidth, setEditorWidth] = useState(70); // Percentage of the main container width
   const [inputValue, setInputValue] = useState("");
   const [output, setOutput] = useState("");
+  const [isVideoCallVisible, setIsVideoCallVisible] = useState(false);
   const { roomId } = useStore();
 
   const copyRoomId = async () => {
@@ -503,6 +338,40 @@ export default function CollaborativeCodeEditor() {
     };
   }, []);
 
+  // Handle user join/leave events
+  useEffect(() => {
+    const socket = getSocket();
+    const { addParticipant } =
+      useStore.getState();
+
+    const handleUserJoined = ({
+      userId,
+    }: {
+      userId: string;
+    }) => {
+      console.log("User joined:", userId);
+      addParticipant({
+        id: userId,
+        name: "Remote User",
+        color: "bg-green-500",
+      });
+    };
+
+    const handleUserLeft = ({ userId }: { userId: string }) => {
+      console.log("User left:", userId);
+      // For simplicity, we'll clear all participants when someone leaves
+      // clearParticipants();
+    };
+
+    socket.on("user-joined", handleUserJoined);
+    socket.on("user-left", handleUserLeft);
+
+    return () => {
+      socket.off("user-joined", handleUserJoined);
+      socket.off("user-left", handleUserLeft);
+    };
+  }, []);
+
   return (
     <div className={`min-h-screen transition-colors duration-300 bg-slate-950`}>
       {/* Header */}
@@ -581,6 +450,17 @@ export default function CollaborativeCodeEditor() {
             <Button variant="outline" size="sm">
               <Share2 className="w-4 h-4 mr-2" />
               Share
+            </Button>
+
+            {/* Video Call Button */}
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setIsVideoCallVisible(!isVideoCallVisible)}
+              className={isVideoCallVisible ? "bg-green-600 text-white" : ""}
+            >
+              <Phone className="w-4 h-4 mr-2" />
+              {isVideoCallVisible ? "Hide Call" : "Video Call"}
             </Button>
           </div>
         </div>
@@ -677,8 +557,11 @@ export default function CollaborativeCodeEditor() {
         </div>
       </div>
 
-      {/* Draggable Video Call Window */}
-      {/* <VideoCallWindow /> */}
+      {/* Video Call Component */}
+      <VideoCall
+        isVisible={isVideoCallVisible}
+        onToggle={() => setIsVideoCallVisible(false)}
+      />
     </div>
   );
 }

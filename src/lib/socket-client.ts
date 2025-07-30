@@ -108,3 +108,51 @@ export const checkRoomStatus = async (roomId: string) => {
     return null;
   }
 };
+
+// WebRTC Signaling Functions
+export const sendCallRequest = (roomId: string, fromUserId: string) => {
+  const socketInstance = getSocket();
+  socketInstance.emit("call-request", { roomId, fromUserId });
+};
+
+export const sendCallAccept = (roomId: string, fromUserId: string) => {
+  const socketInstance = getSocket();
+  socketInstance.emit("call-accept", { roomId, fromUserId });
+};
+
+export const sendCallReject = (roomId: string, fromUserId: string) => {
+  const socketInstance = getSocket();
+  socketInstance.emit("call-reject", { roomId, fromUserId });
+};
+
+export const sendCallEnd = (roomId: string, fromUserId: string) => {
+  const socketInstance = getSocket();
+  socketInstance.emit("call-end", { roomId, fromUserId });
+};
+
+export const sendCallOffer = (
+  roomId: string,
+  offer: RTCSessionDescriptionInit,
+  fromUserId: string
+) => {
+  const socketInstance = getSocket();
+  socketInstance.emit("call-offer", { roomId, offer, fromUserId });
+};
+
+export const sendCallAnswer = (
+  roomId: string,
+  answer: RTCSessionDescriptionInit,
+  fromUserId: string
+) => {
+  const socketInstance = getSocket();
+  socketInstance.emit("call-answer", { roomId, answer, fromUserId });
+};
+
+export const sendIceCandidate = (
+  roomId: string,
+  candidate: RTCIceCandidateInit,
+  fromUserId: string
+) => {
+  const socketInstance = getSocket();
+  socketInstance.emit("ice-candidate", { roomId, candidate, fromUserId });
+};
