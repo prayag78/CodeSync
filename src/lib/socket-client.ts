@@ -84,6 +84,57 @@ export const checkRoomExists = (
   }
 };
 
+// Cursor tracking functions
+export const emitCursorMove = (
+  roomId: string,
+  position: { x: number; y: number },
+  userId: string,
+  userInfo: { name: string; color: string; avatar?: string }
+) => {
+  const socketInstance = getSocket();
+  socketInstance.emit("cursor-move", {
+    roomId,
+    position,
+    userId,
+    userInfo,
+  });
+};
+
+export const emitCursorSelection = (
+  roomId: string,
+  selection: {
+    startLineNumber: number;
+    startColumn: number;
+    endLineNumber: number;
+    endColumn: number;
+  },
+  userId: string,
+  userInfo: { name: string; color: string; avatar?: string }
+) => {
+  const socketInstance = getSocket();
+  socketInstance.emit("cursor-selection", {
+    roomId,
+    selection,
+    userId,
+    userInfo,
+  });
+};
+
+export const emitCursorVisibility = (
+  roomId: string,
+  isVisible: boolean,
+  userId: string,
+  userInfo: { name: string; color: string; avatar?: string }
+) => {
+  const socketInstance = getSocket();
+  socketInstance.emit("cursor-visibility", {
+    roomId,
+    isVisible,
+    userId,
+    userInfo,
+  });
+};
+
 // export const changeLanguage = (language: string, roomId: string) => {
 //   const socketInstance = getSocket();
 //   socketInstance.on("language-changed", (language: string) => {
