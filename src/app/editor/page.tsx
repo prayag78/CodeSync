@@ -11,6 +11,8 @@ import {
   GripVertical,
   Copy,
   Phone,
+  ChevronDown,
+  ChevronUp,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -31,14 +33,17 @@ import { starterCode, users } from "@/lib/constants";
 // Horizontal Resizable Divider Component (for editor/panels split)
 function HorizontalResizableDivider({
   onResize,
+  isMobile = false,
 }: {
   onResize: (deltaX: number) => void;
+  isMobile?: boolean;
 }) {
   const [isDragging, setIsDragging] = useState(false);
 
   const handleMouseDown = (e: React.MouseEvent) => {
+    if (isMobile) return; // Disable on mobile
     setIsDragging(true);
-    document.body.style.userSelect = "none"; // Prevent text selection
+    document.body.style.userSelect = "none";
     const startX = e.clientX;
 
     const handleMouseMove = (e: MouseEvent) => {
@@ -48,7 +53,7 @@ function HorizontalResizableDivider({
 
     const handleMouseUp = () => {
       setIsDragging(false);
-      document.body.style.userSelect = ""; // Restore text selection
+      document.body.style.userSelect = "";
       document.removeEventListener("mousemove", handleMouseMove);
       document.removeEventListener("mouseup", handleMouseUp);
     };
@@ -59,16 +64,16 @@ function HorizontalResizableDivider({
 
   return (
     <div
-      className={`relative w-2 cursor-col-resize group ${"bg-slate-800 hover:bg-slate-700"} transition-colors ${
+      className={`relative cursor-col-resize group bg-slate-800 hover:bg-slate-700 transition-colors ${
         isDragging ? "bg-blue-500" : ""
-      }`}
+      } ${isMobile ? "w-full h-1" : "w-2"}`}
       onMouseDown={handleMouseDown}
     >
       <div className="absolute inset-0 flex items-center justify-center">
         <GripVertical
-          className={`w-4 h-4 ${"text-slate-600 group-hover:text-slate-400"} transition-colors ${
+          className={`text-slate-600 group-hover:text-slate-400 transition-colors ${
             isDragging ? "text-blue-300" : ""
-          }`}
+          } ${isMobile ? "w-6 h-6" : "w-4 h-4"}`}
         />
       </div>
       {isDragging && (
@@ -81,14 +86,17 @@ function HorizontalResizableDivider({
 // Vertical Resizable Divider Component (for input/output split)
 function VerticalResizableDivider({
   onResize,
+  isMobile = false,
 }: {
   onResize: (deltaY: number) => void;
+  isMobile?: boolean;
 }) {
   const [isDragging, setIsDragging] = useState(false);
 
   const handleMouseDown = (e: React.MouseEvent) => {
+    if (isMobile) return; // Disable on mobile
     setIsDragging(true);
-    document.body.style.userSelect = "none"; // Prevent text selection
+    document.body.style.userSelect = "none";
     const startY = e.clientY;
 
     const handleMouseMove = (e: MouseEvent) => {
@@ -98,7 +106,7 @@ function VerticalResizableDivider({
 
     const handleMouseUp = () => {
       setIsDragging(false);
-      document.body.style.userSelect = ""; // Restore text selection
+      document.body.style.userSelect = "";
       document.removeEventListener("mousemove", handleMouseMove);
       document.removeEventListener("mouseup", handleMouseUp);
     };
@@ -109,16 +117,16 @@ function VerticalResizableDivider({
 
   return (
     <div
-      className={`relative h-2 cursor-row-resize group ${"bg-slate-800 hover:bg-slate-700"} transition-colors ${
+      className={`relative cursor-row-resize group bg-slate-800 hover:bg-slate-700 transition-colors ${
         isDragging ? "bg-blue-500" : ""
-      }`}
+      } ${isMobile ? "h-1 w-full" : "h-2"}`}
       onMouseDown={handleMouseDown}
     >
       <div className="absolute inset-0 flex items-center justify-center">
         <GripHorizontal
-          className={`w-4 h-4 ${"text-slate-600 group-hover:text-slate-400"} transition-colors ${
+          className={`text-slate-600 group-hover:text-slate-400 transition-colors ${
             isDragging ? "text-blue-300" : ""
-          }`}
+          } ${isMobile ? "w-6 h-6" : "w-4 h-4"}`}
         />
       </div>
       {isDragging && (
@@ -132,17 +140,38 @@ export default function CollaborativeCodeEditor() {
   const [selectedLanguage, setSelectedLanguage] = useState("javascript");
   const [code, setCode] = useState(starterCode.javascript);
   const [isRunning, setIsRunning] = useState(false);
-  const [inputHeight, setInputHeight] = useState(50); // Percentage of the right panel height
-  const [editorWidth, setEditorWidth] = useState(70); // Percentage of the main container width
+  const [inputHeight, setInputHeight] = useState(50);
+  const [editorWidth, setEditorWidth] = useState(70);
   const [inputValue, setInputValue] = useState("");
   const [output, setOutput] = useState("");
   const [isVideoCallVisible, setIsVideoCallVisible] = useState(false);
+  const [isHeaderCollapsed, setIsHeaderCollapsed] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
+  const [isVerticalLayout, setIsVerticalLayout] = useState(false);
   const { roomId } = useStore();
+
+  // Detect mobile device and screen size
+  useEffect(() => {
+    const checkMobile = () => {
+      const isMobileDevice = window.innerWidth < 768;
+      setIsMobile(isMobileDevice);
+      setIsVerticalLayout(isMobileDevice);
+
+      // Reset layout for mobile
+      if (isMobileDevice) {
+        setEditorWidth(100);
+        setInputHeight(50);
+      }
+    };
+
+    checkMobile();
+    window.addEventListener("resize", checkMobile);
+    return () => window.removeEventListener("resize", checkMobile);
+  }, []);
 
   const copyRoomId = async () => {
     try {
       await navigator.clipboard.writeText(roomId);
-      // You could add a toast notification here
       console.log("Room ID copied to clipboard");
     } catch (err) {
       console.error("Failed to copy room ID:", err);
@@ -153,7 +182,6 @@ export default function CollaborativeCodeEditor() {
     const socket = getSocket();
     socket.emit("change-language", { language, roomId });
 
-    // Safely update current user’s view
     if (starterCode.hasOwnProperty(language)) {
       setSelectedLanguage(language);
       setCode(starterCode[language as keyof typeof starterCode]);
@@ -217,7 +245,8 @@ export default function CollaborativeCodeEditor() {
   };
 
   const handleVerticalResize = (deltaY: number) => {
-    const containerHeight = window.innerHeight - 80; // Subtract header height
+    if (isMobile) return;
+    const containerHeight = window.innerHeight - (isHeaderCollapsed ? 60 : 120);
     const deltaPercentage = (deltaY / containerHeight) * 100;
     const newInputHeight = Math.max(
       20,
@@ -227,6 +256,7 @@ export default function CollaborativeCodeEditor() {
   };
 
   const handleHorizontalResize = (deltaX: number) => {
+    if (isMobile) return;
     const containerWidth = window.innerWidth;
     const deltaPercentage = (deltaX / containerWidth) * 100;
     const newEditorWidth = Math.max(
@@ -238,7 +268,6 @@ export default function CollaborativeCodeEditor() {
 
   const handleCodeChange = (newCode: string) => {
     setCode(newCode);
-
     const socket = getSocket();
     socket.emit("code-changed", { roomId, code: newCode });
   };
@@ -341,14 +370,9 @@ export default function CollaborativeCodeEditor() {
   // Handle user join/leave events
   useEffect(() => {
     const socket = getSocket();
-    const { addParticipant } =
-      useStore.getState();
+    const { addParticipant } = useStore.getState();
 
-    const handleUserJoined = ({
-      userId,
-    }: {
-      userId: string;
-    }) => {
+    const handleUserJoined = ({ userId }: { userId: string }) => {
       console.log("User joined:", userId);
       addParticipant({
         id: userId,
@@ -359,8 +383,6 @@ export default function CollaborativeCodeEditor() {
 
     const handleUserLeft = ({ userId }: { userId: string }) => {
       console.log("User left:", userId);
-      // For simplicity, we'll clear all participants when someone leaves
-      // clearParticipants();
     };
 
     socket.on("user-joined", handleUserJoined);
@@ -373,105 +395,176 @@ export default function CollaborativeCodeEditor() {
   }, []);
 
   return (
-    <div className={`min-h-screen transition-colors duration-300 bg-slate-950`}>
-      {/* Header */}
-      <header className={`border-b  bg-slate-900 border-slate-800 px-6 py-4`}>
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <h1 className={`text-xl font-bold text-white`}>CodeSync</h1>
-
-            {/* Active Users */}
+    <div className="min-h-screen transition-colors duration-300 bg-gray-900">
+      {/* Responsive Header */}
+      <header
+        className={`border-b bg-gray-900 border-slate-800 transition-all duration-300 ${
+          isHeaderCollapsed ? "h-16" : "h-auto"
+        }`}
+      >
+        <div className="px-4 sm:px-6 py-4">
+          {/* Mobile Header */}
+          <div className="flex items-center justify-between lg:hidden">
             <div className="flex items-center gap-2">
-              <Users className={`w-4 h-4 text-gray-400`} />
-              <div className="flex -space-x-2">
-                {users.map((user) => (
-                  <Avatar
-                    key={user.id}
-                    className="w-8 h-8 border-2 border-white"
-                  >
-                    <AvatarImage src={user.avatar || "/placeholder.svg"} />
-                    <AvatarFallback className={user.color}>
-                      {user.name
-                        .split(" ")
-                        .map((n) => n[0])
-                        .join("")}
-                    </AvatarFallback>
-                  </Avatar>
-                ))}
-              </div>
-              <Badge variant="secondary" className="ml-2">
-                Room ID: {roomId}
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={copyRoomId}
-                  className="h-6 w-6 p-0 ml-2"
-                >
-                  <Copy className="w-4 h-4 text-gray-400" />
-                </Button>
-              </Badge>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setIsHeaderCollapsed(!isHeaderCollapsed)}
+                className="p-2"
+              >
+                {isHeaderCollapsed ? (
+                  <ChevronDown className="w-4 h-4" />
+                ) : (
+                  <ChevronUp className="w-4 h-4" />
+                )}
+              </Button>
+              <h1 className="text-lg font-bold text-white">CodeSync</h1>
+            </div>
+
+            <div className="flex items-center gap-2">
+              <Button
+                onClick={runCode}
+                disabled={isRunning}
+                size="sm"
+                className="bg-gray-900 hover:bg-sla-700 text-white"
+              >
+                <Play className="w-4 h-4" />
+              </Button>
+
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setIsVideoCallVisible(!isVideoCallVisible)}
+                className={isVideoCallVisible ? "bg-green-600 text-white" : ""}
+              >
+                <Phone className="w-4 h-4" />
+              </Button>
             </div>
           </div>
 
-          <div className="flex items-center gap-3">
-            {/* Language Selector */}
-            <Select
-              value={selectedLanguage}
-              onValueChange={handleLanguageChange}
-            >
-              <SelectTrigger
-                className={`w-40 bg-slate-800 border-slate-700 text-white`}
-              >
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="cpp">C++</SelectItem>
-                <SelectItem value="javascript">JavaScript</SelectItem>
-                <SelectItem value="typescript">TypeScript</SelectItem>
-                <SelectItem value="python">Python</SelectItem>
-                <SelectItem value="java">Java</SelectItem>
-                <SelectItem value="c">C</SelectItem>
-                <SelectItem value="rust">Rust</SelectItem>
-                <SelectItem value="go">Go</SelectItem>
-              </SelectContent>
-            </Select>
+          {/* Desktop Header */}
+          <div className={`${isHeaderCollapsed ? "hidden" : "block"} lg:block`}>
+            <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+              <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
+                <h1 className="text-xl font-bold text-white">CodeSync</h1>
 
-            {/* Run Button */}
-            <Button
-              onClick={runCode}
-              disabled={isRunning}
-              className="bg-green-600 hover:bg-green-700 text-white px-6"
-            >
-              <Play className="w-4 h-4 mr-2" />
-              {isRunning ? "Running..." : "Run"}
-            </Button>
+                {/* Active Users */}
+                <div className="flex items-center gap-2">
+                  <Users className="w-4 h-4 text-gray-400" />
+                  <div className="flex -space-x-2">
+                    {users.map((user) => (
+                      <Avatar
+                        key={user.id}
+                        className="w-6 h-6 sm:w-8 sm:h-8 border-2 border-white"
+                      >
+                        <AvatarImage src={user.avatar || "/placeholder.svg"} />
+                        <AvatarFallback className={user.color}>
+                          {user.name
+                            .split(" ")
+                            .map((n) => n[0])
+                            .join("")}
+                        </AvatarFallback>
+                      </Avatar>
+                    ))}
+                  </div>
+                  <Badge
+                    variant="secondary"
+                    className="ml-2 text-xs sm:text-sm"
+                  >
+                    <span className="hidden sm:inline">Room ID: </span>
+                    <span className="sm:hidden">ID: </span>
+                    {roomId}
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={copyRoomId}
+                      className="h-6 w-6 p-0 ml-2"
+                    >
+                      <Copy className="w-4 h-4 text-gray-400" />
+                    </Button>
+                  </Badge>
+                </div>
+              </div>
 
-            {/* Share Button */}
-            <Button variant="outline" size="sm">
-              <Share2 className="w-4 h-4 mr-2" />
-              Share
-            </Button>
+              <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
+                {/* Language Selector */}
+                <Select
+                  value={selectedLanguage}
+                  onValueChange={handleLanguageChange}
+                >
+                  <SelectTrigger className="w-full sm:w-40 bg-slate-800 border-slate-700 text-white">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="cpp">C++</SelectItem>
+                    <SelectItem value="javascript">JavaScript</SelectItem>
+                    <SelectItem value="typescript">TypeScript</SelectItem>
+                    <SelectItem value="python">Python</SelectItem>
+                    <SelectItem value="java">Java</SelectItem>
+                    <SelectItem value="c">C</SelectItem>
+                    <SelectItem value="rust">Rust</SelectItem>
+                    <SelectItem value="go">Go</SelectItem>
+                  </SelectContent>
+                </Select>
 
-            {/* Video Call Button */}
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setIsVideoCallVisible(!isVideoCallVisible)}
-              className={isVideoCallVisible ? "bg-green-600 text-white" : ""}
-            >
-              <Phone className="w-4 h-4 mr-2" />
-              {isVideoCallVisible ? "Hide Call" : "Video Call"}
-            </Button>
+                {/* Action Buttons */}
+                <div className="flex items-center gap-2 w-full sm:w-auto">
+                  <Button
+                    onClick={runCode}
+                    disabled={isRunning}
+                    className="bg-gray-700 hover:bg-green-700 text-white px-4 sm:px-6 flex-1 sm:flex-none"
+                  >
+                    <Play className="w-4 h-4 mr-2" />
+                    <span className="hidden sm:inline">
+                      {isRunning ? "Running..." : "Run"}
+                    </span>
+                    <span className="sm:hidden">
+                      {isRunning ? "..." : "Run"}
+                    </span>
+                  </Button>
+
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="hidden sm:flex"
+                  >
+                    <Share2 className="w-4 h-4 mr-2" />
+                    Share
+                  </Button>
+
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setIsVideoCallVisible(!isVideoCallVisible)}
+                    className={`${
+                      isVideoCallVisible ? "bg-green-600 text-white" : ""
+                    } hidden sm:flex`}
+                  >
+                    <Phone className="w-4 h-4 mr-2" />
+                    {isVideoCallVisible ? "Hide Call" : "Video Call"}
+                  </Button>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </header>
 
       {/* Main Content */}
-      <div className="flex h-[calc(100vh-80px)]">
+      <div
+        className={`flex transition-all duration-300 ${
+          isVerticalLayout ? "flex-col" : "flex-row"
+        } h-[calc(100vh-${
+          isHeaderCollapsed ? "64px" : "120px"
+        })] lg:h-[calc(100vh-80px)]`}
+      >
         {/* Code Editor Section */}
         <div
-          className="flex flex-col min-w-0"
-          style={{ width: `${editorWidth}%` }}
+          className={`flex flex-col min-w-0 ${isVerticalLayout ? "h-1/2" : ""}`}
+          style={{
+            width: isVerticalLayout ? "100%" : `${editorWidth}%`,
+            height: isVerticalLayout ? "50%" : "100%",
+          }}
         >
           <CodeEditor
             code={code}
@@ -481,22 +574,40 @@ export default function CollaborativeCodeEditor() {
         </div>
 
         {/* Horizontal Resizable Divider */}
-        <HorizontalResizableDivider onResize={handleHorizontalResize} />
+        {!isVerticalLayout && (
+          <HorizontalResizableDivider
+            onResize={handleHorizontalResize}
+            isMobile={isMobile}
+          />
+        )}
+
+        {/* Vertical Resizable Divider for mobile */}
+        {isVerticalLayout && (
+          <VerticalResizableDivider
+            onResize={handleVerticalResize}
+            isMobile={isMobile}
+          />
+        )}
 
         {/* Resizable Input and Output Panels */}
         <div
-          className={`border-l border-slate-800 bg-slate-900 flex flex-col min-w-0`}
-          style={{ width: `${100 - editorWidth}%` }}
+          className={`border-l border-slate-800 bg-slate-900 flex flex-col min-w-0 ${
+            isVerticalLayout ? "h-1/2" : ""
+          }`}
+          style={{
+            width: isVerticalLayout ? "100%" : `${100 - editorWidth}%`,
+            height: isVerticalLayout ? "50%" : "100%",
+          }}
         >
           {/* Input Panel */}
           <div
             className="flex flex-col min-h-0"
-            style={{ height: `${inputHeight}%` }}
+            style={{ height: isVerticalLayout ? "50%" : `${inputHeight}%` }}
           >
-            <div
-              className={`border-b border-slate-800 px-4 py-3 flex items-center justify-between`}
-            >
-              <h3 className={`font-medium text-white`}>Input</h3>
+            <div className="border-b border-slate-800 px-4 py-3 flex items-center justify-between">
+              <h3 className="font-medium text-white text-sm sm:text-base">
+                Input
+              </h3>
               <div className="flex items-center gap-2">
                 <Button
                   variant="ghost"
@@ -509,12 +620,12 @@ export default function CollaborativeCodeEditor() {
               </div>
             </div>
 
-            <div className="flex-1 p-4 min-h-0">
+            <div className="flex-1 p-2 sm:p-4 min-h-0">
               <textarea
                 value={inputValue}
                 onChange={(e) => handleInputChange(e.target.value)}
                 placeholder="Enter input for your program here..."
-                className={`w-full h-full resize-none   border rounded-md p-3 text-sm font-mono ${"bg-slate-800 border-slate-700 text-gray-100 placeholder-gray-500"} focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all`}
+                className="w-full h-full resize-none border rounded-md p-2 sm:p-3 text-xs sm:text-sm font-mono bg-slate-800 border-slate-700 text-gray-100 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
                 style={{
                   fontFamily: 'Monaco, Menlo, "Ubuntu Mono", monospace',
                   lineHeight: "1.4",
@@ -524,30 +635,37 @@ export default function CollaborativeCodeEditor() {
           </div>
 
           {/* Vertical Resizable Divider */}
-          <VerticalResizableDivider onResize={handleVerticalResize} />
+          {!isVerticalLayout && (
+            <VerticalResizableDivider
+              onResize={handleVerticalResize}
+              isMobile={isMobile}
+            />
+          )}
 
           {/* Output Panel */}
           <div
             className="flex flex-col min-h-0"
-            style={{ height: `${100 - inputHeight}%` }}
+            style={{
+              height: isVerticalLayout ? "50%" : `${100 - inputHeight}%`,
+            }}
           >
-            <div
-              className={`border-b border-slate-800 px-4 py-3 flex items-center justify-between`}
-            >
-              <h3 className={`font-medium text-white`}>Output</h3>
+            <div className="border-b border-slate-800 px-4 py-3 flex items-center justify-between">
+              <h3 className="font-medium text-white text-sm sm:text-base">
+                Output
+              </h3>
             </div>
 
-            <div className="flex-1 p-4 overflow-auto min-h-0 ">
-              <div className="bg-slate-800 border-slate-700 text-gray-100 placeholder-gray-500 rounded-md p-3 h-full">
+            <div className="flex-1 p-2 sm:p-4 overflow-auto min-h-0">
+              <div className="bg-slate-800 border-slate-700 text-gray-100 placeholder-gray-500 rounded-md p-2 sm:p-3 h-full">
                 {isRunning ? (
                   <div className="flex items-center gap-2">
                     <div className="w-4 h-4 border-2 border-green-500 border-t-transparent rounded-full animate-spin" />
-                    <span className={`text-sm ${"text-gray-400"}`}>
+                    <span className="text-xs sm:text-sm text-gray-400">
                       Executing code...
                     </span>
                   </div>
                 ) : (
-                  <div className={`font-mono text-sm ${"text-gray-100"}`}>
+                  <div className="font-mono text-xs sm:text-sm text-gray-100">
                     <div>{output}</div>
                   </div>
                 )}

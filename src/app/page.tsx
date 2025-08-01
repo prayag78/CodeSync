@@ -1,89 +1,20 @@
 "use client";
 
-import React, { useState } from "react";
+import React from "react";
 import { GridBackground } from "@/components/background";
 import { Navbar } from "@/components/navbar";
 import { CreateRoom } from "@/components/create-room-form";
-import { JoinRoom } from "@/components/join-room-form";
 import { Users, Zap, Globe } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { JoinRoom } from "@/components/join-room-form";
 
 const Page = () => {
-  const [activeTab, setActiveTab] = useState<"create" | "join">("create");
-
   return (
     <div className="flex flex-col">
       <Navbar />
 
       {/* Hero */}
       <GridBackground />
-
-      {/* Room Creation/Joining Section */}
-      <div className="z-10 py-20 flex flex-col items-center justify-center">
-        <div className="container px-4 md:px-6">
-          <div className="mb-12 text-center">
-            <h2 className="text-3xl text-gray-700 font-bold tracking-tighter sm:text-4xl md:text-5xl">
-              Start Coding Together
-            </h2>
-            <p className="mt-4 text-xl text-muted-foreground">
-              Create a new room or join an existing one to start collaborating
-            </p>
-          </div>
-
-          <div className="max-w-md mx-auto">
-            {/* Tab Navigation */}
-            <div className="flex mb-6 bg-gray-100 rounded-lg p-1">
-              <button
-                onClick={() => setActiveTab("create")}
-                className={cn(
-                  "flex-1 py-2 px-4 rounded-md text-sm font-medium transition-colors",
-                  activeTab === "create"
-                    ? "bg-white text-gray-900 shadow-sm"
-                    : "text-gray-600 hover:text-gray-900"
-                )}
-              >
-                Create Room
-              </button>
-              <button
-                onClick={() => setActiveTab("join")}
-                className={cn(
-                  "flex-1 py-2 px-4 rounded-md text-sm font-medium transition-colors",
-                  activeTab === "join"
-                    ? "bg-white text-gray-900 shadow-sm"
-                    : "text-gray-600 hover:text-gray-900"
-                )}
-              >
-                Join Room
-              </button>
-            </div>
-
-            {/* Tab Content */}
-            <div className="bg-white rounded-lg shadow-lg p-6">
-              {activeTab === "create" ? (
-                <div className="text-center">
-                  <h3 className="text-lg font-semibold mb-4">
-                    Create a New Room
-                  </h3>
-                  <p className="text-gray-600 mb-6">
-                    Create a new coding session and invite others to join
-                  </p>
-                  <CreateRoom />
-                </div>
-              ) : (
-                <div className="text-center">
-                  <h3 className="text-lg font-semibold mb-4">
-                    Join Existing Room
-                  </h3>
-                  <p className="text-gray-600 mb-6">
-                    Enter a room ID to join an existing coding session
-                  </p>
-                  <JoinRoom />
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
-      </div>
 
       {/* Features */}
       <div
@@ -185,6 +116,57 @@ const Page = () => {
                 </p>
               </div>
             </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Room Creation/Joining Section */}
+      <div className="z-10 py-20 flex flex-col items-center justify-center">
+        <div className="container px-4 md:px-6">
+          <div className="mb-12 text-center">
+            <h2 className="text-3xl text-gray-700 font-bold tracking-tighter sm:text-4xl md:text-5xl">
+              Start Coding Together
+            </h2>
+            <p className="mt-4 text-xl text-muted-foreground">
+              Create a new room or join an existing one to start collaborating
+            </p>
+          </div>
+
+          <div className="max-w-md mx-auto">
+            <Tabs defaultValue="create" className="w-full">
+              <TabsList className="grid w-full grid-cols-2">
+                <TabsTrigger value="create">Create Room</TabsTrigger>
+                <TabsTrigger value="join">Join Room</TabsTrigger>
+              </TabsList>
+
+              <TabsContent value="create" className="mt-6">
+                <div className="bg-white rounded-lg shadow-lg p-6">
+                  <div className="text-center">
+                    <h3 className="text-lg font-semibold mb-4">
+                      Create a New Room
+                    </h3>
+                    <p className="text-gray-600 mb-6">
+                      Create a new coding session and invite others to join
+                    </p>
+                    <CreateRoom />
+                  </div>
+                </div>
+              </TabsContent>
+
+              <TabsContent value="join" className="mt-6">
+                <div className="bg-white rounded-lg shadow-lg p-6">
+                  <div className="text-center">
+                    <h3 className="text-lg font-semibold mb-4">
+                      Join Existing Room
+                    </h3>
+                    <p className="text-gray-600 mb-6">
+                      Enter a room ID to join an existing coding session
+                    </p>
+                    <JoinRoom />
+                  </div>
+                </div>
+              </TabsContent>
+            </Tabs>
           </div>
         </div>
       </div>

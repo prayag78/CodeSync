@@ -5,48 +5,32 @@ import { Button } from "./ui/button";
 import { useRouter } from "next/navigation";
 import { useStore } from "@/hooks/store";
 import { getSocket } from "@/lib/socket-client";
-import { joinRoom } from "@/lib/socket-client";
+import { useUser } from "@clerk/nextjs";
+import { createRoomLogic } from "@/hooks/createroom";
+import { toast } from "sonner";
 
 export function CreateRoom() {
   const [isCreating, setIsCreating] = useState(false);
   const router = useRouter();
   const { setRoomId } = useStore();
-  const [userId] = useState<string>("user" + Math.floor(Math.random() * 1000));
+  const { user } = useUser();
 
   const handleCreateRoom = async () => {
+    if (!user?.id) {
+      toast("User not authenticated");
+      return;
+    }
+
     setIsCreating(true);
     try {
-      // Generate a random room ID
-      const roomId = Math.random().toString(36).substring(2, 15);
-      console.log(`Creating room with ID: ${roomId}`);
-      setRoomId(roomId);
-
-      // Add timeout for server response
-      const timeout = setTimeout(() => {
-        setIsCreating(false);
-        console.error("Connection timeout. Please try again.");
-      }, 5000);
-
-      joinRoom(
-        roomId,
-        userId,
-        () => {
-          console.log(`Successfully created and joined room ${roomId}`);
-          clearTimeout(timeout);
-          setIsCreating(false);
-          router.push(`/editor`);
-        },
-        // Error callback
-        (errorMessage: string) => {
-          console.error(`Failed to create room ${roomId}: ${errorMessage}`);
-          clearTimeout(timeout);
-          setIsCreating(false);
-          console.error("Failed to create room:", errorMessage);
-        },
-        true // isCreating = true
-      );
+      await createRoomLogic({
+        userId: user.id,
+        setRoomId,
+        router,
+      });
     } catch (error) {
       console.error("Failed to create room:", error);
+    } finally {
       setIsCreating(false);
     }
   };
@@ -81,7 +65,7 @@ export function CreateRoom() {
   }, []);
 
   return (
-    <Button onClick={handleCreateRoom}>
+    <Button onClick={handleCreateRoom} disabled={isCreating}>
       {isCreating ? "Creating..." : "Create Room"}
     </Button>
   );

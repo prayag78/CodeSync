@@ -14,33 +14,33 @@ export default function CodeEditor({
   setCode,
 }: CodeEditorProps) {
   const handleEditorMount: OnMount = (editorInstance, monaco) => {
-    monaco.editor.defineTheme("neonNight", {
+    monaco.editor.defineTheme("neonNightSoft", {
       base: "vs-dark",
       inherit: true,
       rules: [
-        { token: "", foreground: "00FFEA" }, // default text: neon cyan
-        { token: "comment", foreground: "39FF14" }, // neon green
-        { token: "keyword", foreground: "FF00FF", fontStyle: "bold" }, // neon magenta
-        { token: "string", foreground: "FFFF00" }, // neon yellow
-        { token: "number", foreground: "FF5F1F" }, // neon orange
-        { token: "type", foreground: "00FFFF" },
-        { token: "function", foreground: "00FFEA" },
-        { token: "variable", foreground: "FF1493" }, // deep pink
+        { token: "", foreground: "66fff0" }, // soft cyan
+        { token: "comment", foreground: "77dd77", fontStyle: "italic" }, // muted neon green
+        { token: "keyword", foreground: "da70d6", fontStyle: "bold" }, // soft magenta
+        { token: "string", foreground: "ffea00" }, // toned-down yellow
+        { token: "number", foreground: "ff8c42" }, // soft orange
+        { token: "type", foreground: "7fdbff" },
+        { token: "function", foreground: "66fff0" },
+        { token: "variable", foreground: "ff69b4" }, // pink
       ],
       colors: {
-        "editor.background": "#0f0f0f", // dark blackish background
-        "editor.foreground": "#00FFEA",
-        "editorLineNumber.foreground": "#444444",
-        "editorCursor.foreground": "#00FFEA",
-        "editor.lineHighlightBackground": "#111111",
-        "editor.selectionBackground": "#00FFEA33",
-        "editor.inactiveSelectionBackground": "#00FFEA22",
-        "editorIndentGuide.activeBackground": "#FF00FF33",
-        "editorIndentGuide.background": "#444444",
+        "editor.background": "#121212", // slightly brighter than pure black
+        "editor.foreground": "#66fff0",
+        "editorLineNumber.foreground": "#555",
+        "editorCursor.foreground": "#66fff0",
+        "editor.lineHighlightBackground": "#1a1a1a",
+        "editor.selectionBackground": "#66fff033", // lighter alpha
+        "editor.inactiveSelectionBackground": "#66fff022",
+        "editorIndentGuide.activeBackground": "#da70d622",
+        "editorIndentGuide.background": "#333",
       },
     });
 
-    monaco.editor.setTheme("neonNight");
+    monaco.editor.setTheme("neonNightSoft");
   };
 
   return (
@@ -48,7 +48,7 @@ export default function CodeEditor({
       height="1000px"
       language={language}
       value={code}
-      theme="neonNight"
+      theme="neonNightSoft"
       defaultValue="// Write your neon code here..."
       options={{
         fontSize: 14,

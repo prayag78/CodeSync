@@ -84,14 +84,6 @@ export const checkRoomExists = (
   }
 };
 
-// export const changeLanguage = (language: string, roomId: string) => {
-//   const socketInstance = getSocket();
-//   socketInstance.on("language-changed", (language: string) => {
-//     console.log(`Language changed to ${language}`);
-//   });
-//   socketInstance.emit("change-language", { language, roomId });
-// };
-
 // Additional utility function to check room status via HTTP endpoint
 export const checkRoomStatus = async (roomId: string) => {
   try {
