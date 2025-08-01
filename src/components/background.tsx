@@ -68,7 +68,7 @@ export function GridBackground() {
       />
 
       {/* Animated Moving Lines */}
-      <AnimatedLinesClientOnly cyanParticles={25} blueParticles={25} />
+      <AnimatedLinesClientOnly cyanParticles={35} blueParticles={35} />
 
       {/* Radial Gradient Mask */}
       <div className="pointer-events-none absolute inset-0 z-10 bg-black [mask-image:radial-gradient(ellipse_at_center,transparent_20%,black_80%)]" />

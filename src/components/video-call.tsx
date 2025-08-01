@@ -408,11 +408,11 @@ export default function VideoCall({ isVisible, onToggle }: VideoCallProps) {
 
   return (
     <div className="fixed left-1/2 -translate-x-1/2 top-1 z-50">
-      <div className="bg-slate-800 border border-slate-700 rounded-lg shadow-2xl overflow-hidden">
+      <div className="bg-gray-900 border border-gray-700 rounded-lg shadow-2xl overflow-hidden">
         {/* Header */}
-        <div className="bg-slate-700 px-4 py-3 flex items-center justify-between">
+        <div className="bg-gray-800 px-4 py-3 flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <Phone className="w-4 h-4 text-green-500" />
+            <Phone className="w-4 h-4 text-gray-100" />
             <span className="text-sm font-medium text-white">Video Call</span>
             {callStatus && (
               <Badge variant="secondary" className="text-xs">
@@ -434,7 +434,7 @@ export default function VideoCall({ isVisible, onToggle }: VideoCallProps) {
         <div className="p-4">
           <div className="mb-4">
             {/* Remote Video Only */}
-            <div className="relative bg-slate-900 rounded overflow-hidden">
+            <div className="relative bg-gray-800 rounded overflow-hidden">
               <video
                 ref={remoteVideoRef}
                 autoPlay
@@ -480,7 +480,7 @@ export default function VideoCall({ isVisible, onToggle }: VideoCallProps) {
             {!isInCall && !isCallRequested && !isCallRequesting && (
               <Button
                 onClick={handleCallRequest}
-                className="bg-green-600 hover:bg-green-700 text-white"
+                className="bg-gray-700 hover:bg-gray-800 text-white"
                 size="sm"
               >
                 <Phone className="w-4 h-4 mr-1" />
@@ -492,7 +492,7 @@ export default function VideoCall({ isVisible, onToggle }: VideoCallProps) {
               <>
                 <Button
                   onClick={handleCallAccept}
-                  className="bg-green-600 hover:bg-green-700 text-white"
+                  className="bg-gray-700 hover:bg-gray-800 text-white"
                   size="sm"
                 >
                   <Phone className="w-4 h-4 mr-1" />

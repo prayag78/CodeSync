@@ -3,10 +3,10 @@
 import React from "react";
 import { GridBackground } from "@/components/background";
 import { Navbar } from "@/components/navbar";
-import { CreateRoom } from "@/components/create-room-form";
 import { Users, Zap, Globe } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { JoinRoom } from "@/components/join-room-form";
+import { CreateRoomTabs } from "@/components/create-room-tabs";
 
 const Page = () => {
   return (
@@ -32,7 +32,7 @@ const Page = () => {
           </div>
           <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
             <div className="flex flex-col items-center p-6 text-center rounded-xl transition-all hover:shadow-md bg-gray-800 text-gray-100">
-              <div className="p-3 mb-4 rounded-full bg-primary/10">
+              <div className="p-3 mb-4 rounded-full bg-gray-100 hover:bg-gray-400 transition-colors">
                 <Users className="w-6 h-6 text-primary" />
               </div>
               <h3 className="text-xl font-bold">Real-time Collaboration</h3>
@@ -42,7 +42,7 @@ const Page = () => {
               </p>
             </div>
             <div className="flex flex-col items-center p-6 text-center rounded-xl transition-all hover:shadow-md bg-gray-800 text-gray-100">
-              <div className="p-3 mb-4 rounded-full bg-primary/10">
+              <div className="p-3 mb-4 rounded-full bg-gray-100 hover:bg-gray-400 transition-colors">
                 <Zap className="w-6 h-6 text-primary" />
               </div>
               <h3 className="text-xl font-bold">Multiple Languages</h3>
@@ -52,7 +52,7 @@ const Page = () => {
               </p>
             </div>
             <div className="flex flex-col items-center p-6 text-center rounded-xl transition-all hover:shadow-md bg-gray-800 text-gray-100">
-              <div className="p-3 mb-4 rounded-full bg-primary/10">
+              <div className="p-3 mb-4 rounded-full bg-gray-100 hover:bg-gray-400 transition-colors">
                 <Globe className="w-6 h-6 text-primary" />
               </div>
               <h3 className="text-xl font-bold">Audio & Video Chat</h3>
@@ -84,7 +84,7 @@ const Page = () => {
               <div className="flex absolute top-0 left-1/2 justify-center items-center w-10 h-10 text-xl font-bold rounded-full -translate-x-1/2 -translate-y-1/2 bg-primary text-primary-foreground">
                 1
               </div>
-              <div className="p-6 pt-10 rounded-xl border shadow-sm bg-background">
+              <div className="p-6 pt-10 rounded-xl border shadow-sm bg-background h-[170px]">
                 <h3 className="mb-2 text-xl font-bold">Create a Room</h3>
                 <p className="text-muted-foreground">
                   Set up a new coding session with your preferred permissions
@@ -96,7 +96,7 @@ const Page = () => {
               <div className="flex absolute top-0 left-1/2 justify-center items-center w-10 h-10 text-xl font-bold rounded-full -translate-x-1/2 -translate-y-1/2 bg-primary text-primary-foreground">
                 2
               </div>
-              <div className="p-6 pt-10 rounded-xl border shadow-sm bg-background">
+              <div className="p-6 pt-10 rounded-xl border shadow-sm bg-background h-[170px] ">
                 <h3 className="mb-2 text-xl font-bold">Invite Collaborators</h3>
                 <p className="text-muted-foreground">
                   Share your room ID with teammates to start collaborating
@@ -108,7 +108,7 @@ const Page = () => {
               <div className="flex absolute top-0 left-1/2 justify-center items-center w-10 h-10 text-xl font-bold rounded-full -translate-x-1/2 -translate-y-1/2 bg-primary text-primary-foreground">
                 3
               </div>
-              <div className="p-6 pt-10 rounded-xl border shadow-sm bg-background">
+              <div className="p-6 pt-10 rounded-xl border shadow-sm bg-background h-[170px]">
                 <h3 className="mb-2 text-xl font-bold">Code Together</h3>
                 <p className="text-muted-foreground">
                   Write, run, and debug code in real-time with your team using
@@ -148,7 +148,7 @@ const Page = () => {
                     <p className="text-gray-600 mb-6">
                       Create a new coding session and invite others to join
                     </p>
-                    <CreateRoom />
+                    <CreateRoomTabs />
                   </div>
                 </div>
               </TabsContent>

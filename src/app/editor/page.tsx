@@ -6,10 +6,9 @@ import { useState, useEffect } from "react";
 import {
   Play,
   Users,
-  Share2,
+  // Share2,
   GripHorizontal,
   GripVertical,
-  Copy,
   Phone,
   ChevronDown,
   ChevronUp,
@@ -29,6 +28,7 @@ import VideoCall from "@/components/video-call";
 import { useStore } from "@/hooks/store";
 import { getSocket } from "@/lib/socket-client";
 import { starterCode, users } from "@/lib/constants";
+import { CopyButton } from "@/components/ui/copy";
 
 // Horizontal Resizable Divider Component (for editor/panels split)
 function HorizontalResizableDivider({
@@ -169,14 +169,6 @@ export default function CollaborativeCodeEditor() {
     return () => window.removeEventListener("resize", checkMobile);
   }, []);
 
-  const copyRoomId = async () => {
-    try {
-      await navigator.clipboard.writeText(roomId);
-      console.log("Room ID copied to clipboard");
-    } catch (err) {
-      console.error("Failed to copy room ID:", err);
-    }
-  };
 
   const handleLanguageChange = (language: string) => {
     const socket = getSocket();
@@ -432,10 +424,10 @@ export default function CollaborativeCodeEditor() {
               </Button>
 
               <Button
-                variant="outline"
+                variant="default"
                 size="sm"
                 onClick={() => setIsVideoCallVisible(!isVideoCallVisible)}
-                className={isVideoCallVisible ? "bg-green-600 text-white" : ""}
+                className={isVideoCallVisible ? "bg-gray-700 text-white" : "bg-gray-700 text-white"}
               >
                 <Phone className="w-4 h-4" />
               </Button>
@@ -474,14 +466,7 @@ export default function CollaborativeCodeEditor() {
                     <span className="hidden sm:inline">Room ID: </span>
                     <span className="sm:hidden">ID: </span>
                     {roomId}
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={copyRoomId}
-                      className="h-6 w-6 p-0 ml-2"
-                    >
-                      <Copy className="w-4 h-4 text-gray-400" />
-                    </Button>
+                    <CopyButton value={roomId}/>
                   </Badge>
                 </div>
               </div>
@@ -492,7 +477,7 @@ export default function CollaborativeCodeEditor() {
                   value={selectedLanguage}
                   onValueChange={handleLanguageChange}
                 >
-                  <SelectTrigger className="w-full sm:w-40 bg-slate-800 border-slate-700 text-white">
+                  <SelectTrigger className="w-full sm:w-40 bg-gray-700 border-slate-700 text-white">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
@@ -510,9 +495,10 @@ export default function CollaborativeCodeEditor() {
                 {/* Action Buttons */}
                 <div className="flex items-center gap-2 w-full sm:w-auto">
                   <Button
+                    variant="default"
                     onClick={runCode}
                     disabled={isRunning}
-                    className="bg-gray-700 hover:bg-green-700 text-white px-4 sm:px-6 flex-1 sm:flex-none"
+                    className="bg-gray-700 hover:bg-gray-800 text-white px-4 sm:px-6 flex-1 sm:flex-none"
                   >
                     <Play className="w-4 h-4 mr-2" />
                     <span className="hidden sm:inline">
@@ -523,22 +509,19 @@ export default function CollaborativeCodeEditor() {
                     </span>
                   </Button>
 
-                  <Button
+                  {/* <Button
                     variant="outline"
                     size="sm"
                     className="hidden sm:flex"
                   >
                     <Share2 className="w-4 h-4 mr-2" />
                     Share
-                  </Button>
+                  </Button> */}
 
                   <Button
-                    variant="outline"
-                    size="sm"
+                    variant="default"
                     onClick={() => setIsVideoCallVisible(!isVideoCallVisible)}
-                    className={`${
-                      isVideoCallVisible ? "bg-green-600 text-white" : ""
-                    } hidden sm:flex`}
+                    className="bg-gray-700 text-white hover:bg-gray-800"
                   >
                     <Phone className="w-4 h-4 mr-2" />
                     {isVideoCallVisible ? "Hide Call" : "Video Call"}

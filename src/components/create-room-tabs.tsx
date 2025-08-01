@@ -7,8 +7,9 @@ import { getSocket } from "@/lib/socket-client";
 import { useUser } from "@clerk/nextjs";
 import { createRoomLogic } from "@/hooks/createroom";
 import { toast } from "sonner";
+import { Button } from "./ui/button";
 
-export function CreateRoom() {
+export function CreateRoomTabs() {
   const [isCreating, setIsCreating] = useState(false);
   const router = useRouter();
   const { setRoomId } = useStore();
@@ -64,21 +65,8 @@ export function CreateRoom() {
   }, []);
 
   return (
-    <button
-      onClick={handleCreateRoom}
-      disabled={isCreating}
-      className="relative inline-block overflow-hidden rounded-md px-4 py-2 font-semibold text-gray-100  hover:text-gray-900 text-sm uppercase tracking-wider transition-all duration-300 group disabled:opacity-50 disabled:cursor-not-allowed"
-    >
-      {/* Base background */}
-      <span className="absolute inset-0 bg-gray-900 rounded-full -z-20" />
-
-      {/* Hover overlay */}
-      <span className="absolute inset-0 w-0 bg-gray-100 rounded-full transition-all duration-300 group-hover:w-full -z-10" />
-
-      {/* Text */}
-      <span className="relative z-10">
-        {isCreating ? "Creating..." : "Create Room"}
-      </span>
-    </button>
+    <Button onClick={handleCreateRoom} disabled={isCreating}>
+      {isCreating ? "Creating..." : "Create Room"}
+    </Button>
   );
 }

@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { ClerkProvider } from "@clerk/nextjs";
 import { Toaster } from "@/components/ui/sonner";
+import { Footer } from "@/components/footer";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -33,7 +34,8 @@ export default function RootLayout({
           suppressHydrationWarning={true}
         >
           {children}
-          <Toaster position="top-right" richColors />
+          <Footer />
+          <Toaster position="top-center" richColors />
         </body>
       </html>
     </ClerkProvider>
