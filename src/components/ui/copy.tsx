@@ -22,7 +22,7 @@ export function CopyButton({ value, className }: CopyButtonProps) {
   return (
     <motion.button
       onClick={handleCopy}
-      className={cn("group relative rounded-md p-1.5 text-zinc-400", className)}
+      className={cn("group relative rounded-md p-1 text-zinc-400", className)}
       aria-label="Copy command"
     //   whileHover={{
     //     backgroundColor: "rgba(255, 255, 255, 0.1)",

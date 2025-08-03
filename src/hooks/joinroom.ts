@@ -14,7 +14,7 @@ export async function joinRoomLogic({
   router: AppRouterInstance;
 }) {
   try {
-    console.log(`Attempting to join room with ID: ${roomId}`);
+    //console.log(`Attempting to join room with ID: ${roomId}`);
     setRoomId(roomId);
 
     // First check if the room exists
@@ -23,7 +23,7 @@ export async function joinRoomLogic({
         roomId,
         // Room exists - proceed to join
         () => {
-          console.log(`Room ${roomId} exists, joining...`);
+          //console.log(`Room ${roomId} exists, joining...`);
 
           const timeout = setTimeout(() => {
             toast.error("Connection timeout. Please try again.");
@@ -34,7 +34,7 @@ export async function joinRoomLogic({
             roomId,
             userId,
             () => {
-              console.log(`Successfully joined room ${roomId}`);
+              //console.log(`Successfully joined room ${roomId}`);
               clearTimeout(timeout);
               router.push(`/editor`);
               resolve(true);
@@ -50,7 +50,7 @@ export async function joinRoomLogic({
         },
         // Room doesn't exist
         () => {
-          console.log(`Room ${roomId} does not exist`);
+          //console.log(`Room ${roomId} does not exist`);
           toast.error("Room does not exist. Please check the room ID.");
           reject(new Error("Room does not exist"));
         }

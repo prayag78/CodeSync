@@ -36,15 +36,21 @@ export const joinRoom = (
   // Remove existing listeners to prevent duplicates
   socketInstance.off("room-joined");
   socketInstance.off("room-not-available");
+  socketInstance.off("room-full");
 
   // Listen for room join response
   socketInstance.on("room-joined", () => {
-    console.log(`Successfully joined room ${roomId}`);
+    //console.log(`Successfully joined room ${roomId}`);
     onSuccess?.();
   });
 
   socketInstance.on("room-not-available", (message: string) => {
-    console.log(`Room ${roomId} is not available: ${message}`);
+    //console.log(`Room ${roomId} is not available: ${message}`);
+    onError?.(message);
+  });
+
+  socketInstance.on("room-full", (message: string) => {
+    //console.log(`Room ${roomId} is full: ${message}`);
     onError?.(message);
   });
 
@@ -64,12 +70,12 @@ export const checkRoomExists = (
 
   // Listen for room existence response
   socketInstance.on("room-exists", () => {
-    console.log(`Room ${roomId} exists`);
+    //console.log(`Room ${roomId} exists`);
     onExists?.();
   });
 
   socketInstance.on("room-not-exists", () => {
-    console.log(`Room ${roomId} does not exist`);
+    //console.log(`Room ${roomId} does not exist`);
     onNotExists?.();
   });
 
@@ -78,7 +84,7 @@ export const checkRoomExists = (
     socketInstance.emit("check-room", { roomId });
   } else {
     socketInstance.on("connect", () => {
-      console.log("Socket connected, checking room existence...");
+      //console.log("Socket connected, checking room existence...");
       socketInstance.emit("check-room", { roomId });
     });
   }
@@ -93,7 +99,7 @@ export const checkRoomStatus = async (roomId: string) => {
       }/api/rooms/${roomId}`
     );
     const data = await response.json();
-    console.log("Room status:", data);
+    //console.log("Room status:", data);
     return data;
   } catch (error) {
     console.error("Error checking room status:", error);

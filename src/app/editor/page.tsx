@@ -169,7 +169,6 @@ export default function CollaborativeCodeEditor() {
     return () => window.removeEventListener("resize", checkMobile);
   }, []);
 
-
   const handleLanguageChange = (language: string) => {
     const socket = getSocket();
     socket.emit("change-language", { language, roomId });
@@ -201,7 +200,7 @@ export default function CollaborativeCodeEditor() {
       });
 
       const data = await res.json();
-      console.log("Full response:", data);
+      //console.log("Full response:", data);
 
       if (!data.run) {
         setOutput(data.message || "Execution failed.");
@@ -274,7 +273,7 @@ export default function CollaborativeCodeEditor() {
     const socket = getSocket();
 
     const handleLanguageUpdate = (language: string) => {
-      console.log("📡 Received language update:", language);
+      //console.log("📡 Received language update:", language);
       if (starterCode.hasOwnProperty(language)) {
         setSelectedLanguage(language);
         setCode(starterCode[language as keyof typeof starterCode]);
@@ -332,7 +331,7 @@ export default function CollaborativeCodeEditor() {
       code: string;
       input: string;
     }) => {
-      console.log("Received code run result");
+      //console.log("Received code run result");
 
       setSelectedLanguage(language);
       setCode(code);
@@ -365,7 +364,7 @@ export default function CollaborativeCodeEditor() {
     const { addParticipant } = useStore.getState();
 
     const handleUserJoined = ({ userId }: { userId: string }) => {
-      console.log("User joined:", userId);
+      //console.log("User joined:", userId);
       addParticipant({
         id: userId,
         name: "Remote User",
@@ -392,22 +391,22 @@ export default function CollaborativeCodeEditor() {
       <header
         className={`border-b bg-gray-900 border-slate-800 transition-all duration-300 ${
           isHeaderCollapsed ? "h-16" : "h-auto"
-        }`}
+        } ${isMobile ? "mb-1 px-3" : ""}`}
       >
-        <div className="px-4 sm:px-6 py-4">
+        <div className={`${isMobile ? "px-2 py-1" : "px-4 sm:px-6 py-4"}`}>
           {/* Mobile Header */}
           <div className="flex items-center justify-between lg:hidden">
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-3">
               <Button
                 variant="ghost"
                 size="sm"
                 onClick={() => setIsHeaderCollapsed(!isHeaderCollapsed)}
-                className="p-2"
+                className="p-2 hover:bg-gray-800 rounded-lg"
               >
                 {isHeaderCollapsed ? (
-                  <ChevronDown className="w-4 h-4" />
+                  <ChevronDown className="w-4 h-4 text-gray-300" />
                 ) : (
-                  <ChevronUp className="w-4 h-4" />
+                  <ChevronUp className="w-4 h-4 text-gray-300" />
                 )}
               </Button>
               <h1 className="text-lg font-bold text-white">CodeSync</h1>
@@ -418,7 +417,7 @@ export default function CollaborativeCodeEditor() {
                 onClick={runCode}
                 disabled={isRunning}
                 size="sm"
-                className="bg-gray-900 hover:bg-sla-700 text-white"
+                className="bg-gray-800 hover:bg-gray-700 text-white rounded-lg px-3 py-2"
               >
                 <Play className="w-4 h-4" />
               </Button>
@@ -427,7 +426,11 @@ export default function CollaborativeCodeEditor() {
                 variant="default"
                 size="sm"
                 onClick={() => setIsVideoCallVisible(!isVideoCallVisible)}
-                className={isVideoCallVisible ? "bg-gray-700 text-white" : "bg-gray-700 text-white"}
+                className={`rounded-lg px-3 py-2 ${
+                  isVideoCallVisible
+                    ? "bg-blue-600 hover:bg-blue-700 text-white"
+                    : "bg-gray-800 hover:bg-gray-700 text-white"
+                }`}
               >
                 <Phone className="w-4 h-4" />
               </Button>
@@ -438,7 +441,9 @@ export default function CollaborativeCodeEditor() {
           <div className={`${isHeaderCollapsed ? "hidden" : "block"} lg:block`}>
             <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
               <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
-                <h1 className="text-xl font-bold text-white">CodeSync</h1>
+                <h1 className="text-xl font-bold text-white hidden sm:block">
+                  CodeSync
+                </h1>
 
                 {/* Active Users */}
                 <div className="flex items-center gap-2">
@@ -466,7 +471,7 @@ export default function CollaborativeCodeEditor() {
                     <span className="hidden sm:inline">Room ID: </span>
                     <span className="sm:hidden">ID: </span>
                     {roomId}
-                    <CopyButton value={roomId}/>
+                    <CopyButton value={roomId} />
                   </Badge>
                 </div>
               </div>
@@ -539,21 +544,31 @@ export default function CollaborativeCodeEditor() {
           isVerticalLayout ? "flex-col" : "flex-row"
         } h-[calc(100vh-${
           isHeaderCollapsed ? "64px" : "120px"
-        })] lg:h-[calc(100vh-80px)]`}
+        })] lg:h-[calc(100vh-80px)] ${
+          isMobile ? "gap-2 p-3 overflow-auto" : ""
+        }`}
+        style={{
+          scrollbarWidth: isMobile ? "thin" : "auto",
+          scrollbarColor: isMobile ? "#66fff033 #121212" : "auto",
+        }}
       >
         {/* Code Editor Section */}
         <div
-          className={`flex flex-col min-w-0 ${isVerticalLayout ? "h-1/2" : ""}`}
+          className={`flex flex-col min-w-0 ${
+            isVerticalLayout ? "h-1/2" : ""
+          } ${isMobile ? "rounded-lg overflow-hidden" : ""}`}
           style={{
             width: isVerticalLayout ? "100%" : `${editorWidth}%`,
             height: isVerticalLayout ? "50%" : "100%",
           }}
         >
-          <CodeEditor
-            code={code}
-            language={selectedLanguage}
-            setCode={handleCodeChange}
-          />
+          <div className="flex-1 min-h-0 overflow-hidden">
+            <CodeEditor
+              code={code}
+              language={selectedLanguage}
+              setCode={handleCodeChange}
+            />
+          </div>
         </div>
 
         {/* Horizontal Resizable Divider */}
@@ -576,7 +591,7 @@ export default function CollaborativeCodeEditor() {
         <div
           className={`border-l border-slate-800 bg-slate-900 flex flex-col min-w-0 ${
             isVerticalLayout ? "h-1/2" : ""
-          }`}
+          } ${isMobile ? "rounded-lg" : ""}`}
           style={{
             width: isVerticalLayout ? "100%" : `${100 - editorWidth}%`,
             height: isVerticalLayout ? "50%" : "100%",
@@ -612,6 +627,9 @@ export default function CollaborativeCodeEditor() {
                 style={{
                   fontFamily: 'Monaco, Menlo, "Ubuntu Mono", monospace',
                   lineHeight: "1.4",
+                  overflow: isMobile ? "auto" : "hidden",
+                  scrollbarWidth: isMobile ? "thin" : "auto",
+                  scrollbarColor: isMobile ? "#66fff033 #121212" : "auto",
                 }}
               />
             </div>
@@ -639,7 +657,13 @@ export default function CollaborativeCodeEditor() {
             </div>
 
             <div className="flex-1 p-2 sm:p-4 overflow-auto min-h-0">
-              <div className="bg-slate-800 border-slate-700 text-gray-100 placeholder-gray-500 rounded-md p-2 sm:p-3 h-full">
+              <div
+                className="bg-slate-800 border-slate-700 text-gray-100 placeholder-gray-500 rounded-md p-2 sm:p-3 h-full"
+                style={{
+                  scrollbarWidth: isMobile ? "thin" : "auto",
+                  scrollbarColor: isMobile ? "#66fff033 #121212" : "auto",
+                }}
+              >
                 {isRunning ? (
                   <div className="flex items-center gap-2">
                     <div className="w-4 h-4 border-2 border-green-500 border-t-transparent rounded-full animate-spin" />

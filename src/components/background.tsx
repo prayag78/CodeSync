@@ -68,7 +68,7 @@ export function GridBackground() {
       />
 
       {/* Animated Moving Lines */}
-      <AnimatedLinesClientOnly cyanParticles={35} blueParticles={35} />
+      <AnimatedLinesClientOnly cyanParticles={45} blueParticles={45} />
 
       {/* Radial Gradient Mask */}
       <div className="pointer-events-none absolute inset-0 z-10 bg-black [mask-image:radial-gradient(ellipse_at_center,transparent_20%,black_80%)]" />
@@ -92,8 +92,7 @@ export function GridBackground() {
 
         {/* Description */}
         <p className="text-neutral-400 mb-6 text-sm sm:text-base">
-          Create collaborative coding sessions with audio, video, and text chat.
-          Run code in multiple languages and share your work instantly.
+        Create collaborative coding sessions with audio, video, and real-time code editing. Run code in multiple languages and share your work instantly.
         </p>
 
         {/* Call to action form */}

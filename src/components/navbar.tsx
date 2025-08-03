@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
-import { Menu, X, Code } from "lucide-react";
+import { Menu, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -25,6 +25,7 @@ import { syncUser } from "@/actions/user";
 import { joinRoomLogic } from "@/hooks/joinroom";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
+import Image from "next/image";
 
 export function Navbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -75,15 +76,20 @@ export function Navbar() {
       <div className="absolute inset-0 bg-white/10 backdrop-blur-md border border-white/20 rounded-2xl shadow-2xl" />
 
       <div className="relative px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-around h-14">
+        <div className="flex items-center justify-between h-14">
           {/* Logo */}
-          <Link href="/" className="flex items-center space-x-2">
-            <Code className="h-8 w-8 text-blue-400" />
-            <span className="text-sm font-bold text-white">CodeSync</span>
+          <Link href="/">
+            <Image
+              src="/icon0.svg"
+              alt="CodeSync Logo"
+              width={180}
+              height={200}
+              className="mb-1"
+            />  
           </Link>
 
-          {/* Desktop Navigation */}
-          <div className="hidden md:flex items-center space-x-8 text-sm">
+          {/* Desktop Navigation - Centered */}
+          <div className="hidden md:flex items-center space-x-8 text-sm absolute left-1/2 transform -translate-x-1/2">
             <Link
               href="#features"
               className="text-white/80 hover:text-white transition-colors duration-200"
@@ -133,7 +139,7 @@ export function Navbar() {
           </div>
 
           {/* CTA Buttons */}
-          <div className="hidden md:flex items-center space-x-1 text-sm ml-16">
+          <div className="hidden md:flex items-center space-x-1 text-sm">
             <SignedOut>
               <SignInButton mode="modal">
                 <Button variant="default">Sign In</Button>
@@ -171,7 +177,7 @@ export function Navbar() {
 
         {/* Mobile Navigation */}
         {isMenuOpen && (
-          <div className="md:hidden">
+          <div className="md:hidden pb-3">
             <div className="px-2 pt-2 pb-3 space-y-1 bg-white/10 backdrop-blur-md rounded-lg mt-2 border border-white/20">
               <Link
                 href="#features"
@@ -222,7 +228,9 @@ export function Navbar() {
               <div className="pt-4 pb-2 border-t border-white/20">
                 <SignedOut>
                   <SignInButton mode="modal">
-                    <Button variant="default">Sign In</Button>
+                    <Button variant="default" className="mr-1">
+                      Sign In
+                    </Button>
                   </SignInButton>
                 </SignedOut>
                 <SignedOut>
@@ -231,7 +239,9 @@ export function Navbar() {
                   </SignUpButton>
                 </SignedOut>
                 <SignedIn>
-                  <UserButton />
+                  <div className="ml-3">
+                    <UserButton />
+                  </div>
                 </SignedIn>
               </div>
             </div>

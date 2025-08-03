@@ -184,4 +184,37 @@
   .glow-blue-soft {
     box-shadow: 0 0 5px rgba(59, 130, 246, 0.3);
   }
+
+  /* Mobile Scrollbar Styles */
+  @media (max-width: 768px) {
+    /* Webkit browsers (Chrome, Safari, Edge) */
+    ::-webkit-scrollbar {
+      width: 8px;
+      height: 8px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: #121212;
+      border-radius: 4px;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: rgba(102, 255, 240, 0.2);
+      border-radius: 4px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background: rgba(102, 255, 240, 0.4);
+    }
+
+    ::-webkit-scrollbar-thumb:active {
+      background: rgba(102, 255, 240, 0.6);
+    }
+
+    /* Firefox */
+    * {
+      scrollbar-width: thin;
+      scrollbar-color: rgba(102, 255, 240, 0.2) #121212;
+    }
+  }
 }

@@ -99,8 +99,7 @@ const Page = () => {
               <div className="p-6 pt-10 rounded-xl border shadow-sm bg-background h-[170px] ">
                 <h3 className="mb-2 text-xl font-bold">Invite Collaborators</h3>
                 <p className="text-muted-foreground">
-                  Share your room ID with teammates to start collaborating
-                  instantly.
+                Share your room ID with a teammate to start coding together instantly.
                 </p>
               </div>
             </div>
@@ -111,8 +110,8 @@ const Page = () => {
               <div className="p-6 pt-10 rounded-xl border shadow-sm bg-background h-[170px]">
                 <h3 className="mb-2 text-xl font-bold">Code Together</h3>
                 <p className="text-muted-foreground">
-                  Write, run, and debug code in real-time with your team using
-                  our powerful editor.
+                  Pair up and code in real-time — write, run, and share code
+                  instantly in a private 2-person room.
                 </p>
               </div>
             </div>

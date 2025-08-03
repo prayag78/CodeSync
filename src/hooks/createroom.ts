@@ -16,7 +16,7 @@ export async function createRoomLogic({
   try {
     // Generate a random room ID
     const roomId = Math.random().toString(36).substring(2, 15);
-    console.log(`Creating room with ID: ${roomId}`);
+    //console.log(`Creating room with ID: ${roomId}`);
     setRoomId(roomId);
 
     const timeout = setTimeout(() => {
@@ -33,7 +33,7 @@ export async function createRoomLogic({
       roomId,
       userId,
       () => {
-        console.log(`Successfully created and joined room ${roomId}`);
+        //console.log(`Successfully created and joined room ${roomId}`);
         clearTimeout(timeout);
         toast.success(`Successfully created room ${roomId}`);
         router.push(`/editor`);

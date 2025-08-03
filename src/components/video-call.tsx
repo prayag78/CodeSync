@@ -58,7 +58,7 @@ export default function VideoCall({ isVisible, onToggle }: VideoCallProps) {
     };
 
     pc.ontrack = (event) => {
-      console.log("Received remote track:", event.streams[0]);
+      //console.log("Received remote track:", event.streams[0]);
       remoteStreamRef.current = event.streams[0];
       if (remoteVideoRef.current) {
         remoteVideoRef.current.srcObject = event.streams[0];
@@ -68,7 +68,7 @@ export default function VideoCall({ isVisible, onToggle }: VideoCallProps) {
     };
 
     pc.oniceconnectionstatechange = () => {
-      console.log("ICE connection state:", pc.iceConnectionState);
+      //console.log("ICE connection state:", pc.iceConnectionState);
       if (pc.iceConnectionState === "connected") {
         setCallStatus("Connected");
         setIsCallActive(true);
@@ -237,7 +237,7 @@ export default function VideoCall({ isVisible, onToggle }: VideoCallProps) {
     }: {
       fromUserId: string;
     }) => {
-      console.log("Call accepted by remote user:", fromUserId);
+      //console.log("Call accepted by remote user:", fromUserId);
       setIsCallRequesting(false); // Stop the loader for the initiator
       setIsInCall(true); // Call is now established from UI perspective
       setCallStatus("Call accepted. Establishing media...");
