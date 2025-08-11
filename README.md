@@ -59,6 +59,8 @@ CodeSync is a modern, real-time collaborative code editor that enables users to 
 
 ```
 codesync/
+├── prisma/                    # Prisma schema and migrations
+├── public/                    # Static assets
 ├── src/
 │   ├── actions/               # Server actions
 │   ├── app/
@@ -81,9 +83,11 @@ codesync/
 │   ├── hooks/                 # Custom React hooks
 │   ├── generated/             # Generated files (Prisma)
 │   └── middleware.ts          # Clerk authentication middleware
-├── public/                    # Static assets
-├── package.json               # Dependencies and scripts
-└── README.md                  # Project documentation
+├── .dockerignore              # Docker ignore file
+├── .env                       # Environment variables
+├── Dockerfile                 # Dockerfile
+├── docker-compose.yml         # Docker compose file
+└── package.json               # Dependencies and scripts
 ```
 
 ### Backend (Socket Server)
@@ -95,6 +99,8 @@ socket-server/
 ├── dist/                     # Compiled JavaScript files
 ├── node_modules/             # Dependencies
 ├── package.json              # Server dependencies and scripts
+├── Dockerfile                # Server dependencies and scripts
+├── .dockerignore             # Server dependencies and scripts
 └── tsconfig.json             # TypeScript configuration
 ```
 
@@ -102,19 +108,6 @@ socket-server/
 
 - **Frontend**: [CodeSync Repository](https://github.com/prayag78/codesync) - Next.js application
 - **Backend**: [Socket Server Repository](https://github.com/prayag78/socket-server) - Node.js Socket.IO server
-
-### Key Files Explained
-
-**Core Libraries (`src/lib/`):**
-
-- `constants.ts` - Contains starter code templates for different programming languages and user data
-- `prisma.ts` - Database client configuration and connection management
-- `socket-client.ts` - Socket.IO client setup, room management, and WebRTC signaling functions
-- `utils.ts` - Utility functions for class name merging (clsx + tailwind-merge)
-
-**Authentication:**
-
-- `middleware.ts` - Clerk authentication middleware for protecting routes
 
 ## 🚀 Getting Started
 
@@ -181,7 +174,62 @@ socket-server/
 - Both servers must be running simultaneously for full functionality
 - Frontend: `http://localhost:3000` (Next.js app)
 - Backend: `http://localhost:8000` (Socket.IO server)
-- Make sure your `NEXT_PUBLIC_SOCKET_URL` environment variable points to `http://localhost:8000`
+
+## 🐳 Docker Setup
+
+### Prerequisites
+
+- Docker Desktop installed and running
+- Docker Compose (included with Docker Desktop)
+
+### Quick Start with Docker Compose
+
+1. **Create environment file**
+   Create a `.env` file in the root directory:
+
+   ```env
+   # Database Configuration
+   DATABASE_URL=postgresql://user:password@host:port/database
+
+   # Clerk Authentication
+   NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=pk_test_your_actual_key_here
+   CLERK_SECRET_KEY=sk_test_your_actual_secret_here
+
+   # Socket Server URL
+   NEXT_PUBLIC_SOCKET_URL=http://localhost:8000
+   ```
+
+2. **Start all services**
+
+   ```bash
+   docker-compose up -d
+   ```
+
+3. **Access your application**
+   - Frontend: [http://localhost:3000](http://localhost:3000)
+   - Socket Server: [http://localhost:8000](http://localhost:8000)
+
+### Manual Docker Build
+
+1. **Build the frontend image**
+
+   ```bash
+   docker build \
+     --build-arg NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY="your_clerk_key" \
+     --build-arg DATABASE_URL="your_database_url" \
+     -t codesync-frontend:latest .
+   ```
+
+2. **Run the container**
+   ```bash
+   docker run -p 3000:3000 \
+     -e NEXT_PUBLIC_SOCKET_URL=http://host.docker.internal:8000 \
+     -e DATABASE_URL="your_database_url" \
+     -e NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY="your_clerk_key" \
+     -e CLERK_SECRET_KEY="your_clerk_secret" \
+     --name codesync-frontend \
+     codesync-frontend:latest
+   ```
 
 ## 🚀 Deployment
 
